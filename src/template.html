@@ -98,7 +98,7 @@
     #smoke .smoke-puff { opacity: 0; transform-box: fill-box; transform-origin: center; }
     #target-grid .target-pulse { opacity: 0; transform-box: fill-box; transform-origin: center; }
 
-    /* One fire mission (4 seconds) plays when the art appears; nothing loops, so no pause control is needed. */
+    /* One collection cycle (4 seconds) plays when the art appears; nothing loops, so no pause control is needed. */
     #barrel { animation: recoil 4s ease-out 1 both; }
     #muzzle-flash { animation: muzzle-flash 4s ease-out 1 both; }
     #projectile { animation: projectile-arc 4s linear 1 both; }
@@ -318,7 +318,7 @@
   <header class="site-header hero">
     <div class="hero-inner">
       <div class="hero-copy">
-        <p class="eyebrow">Philippine Army · Signal School</p>
+        <p class="eyebrow">Philippine Army · Intelligence, Surveillance and Reconnaissance</p>
         <h1>ISR Operations Mastery Quiz</h1>
         <p class="hero-lede">A practice aid for the Introduction to ISR Operations lesson: 75 situational questions across Easy, Medium, and Hard.</p>
       </div>
@@ -330,13 +330,32 @@
             <circle cx="140" cy="200" r="190"/>
             <circle cx="140" cy="200" r="270"/>
           </g>
-          <text x="146" y="86" fill="#e3b65a" fill-opacity="0.85">RNG 40 KM</text>
-          <text x="146" y="18" fill="#e3b65a" fill-opacity="0.85">RNG 80 KM</text>
-          <text x="262" y="18" fill="#e3b65a">ISR TASKING · TEAM A</text>
-          <text x="262" y="31" fill="#d6d2bf">GRID 51P TT 3341 1276 · UAS 02</text>
+          <text x="12" y="18" fill="#e3b65a">ISR TASKING · COLLECT · PROCESS · DISSEMINATE</text>
+          <text x="12" y="31" fill="#d6d2bf">INTELLIGENCE · SURVEILLANCE · RECONNAISSANCE</text>
+          <path d="M300 60Q380 6 450 70" fill="none" stroke="#7fc8d8" stroke-opacity="0.45" stroke-width="1.2" stroke-dasharray="2 5"/>
+          <g class="satellite" transform="translate(405 42)">
+            <rect x="-9" y="-6" width="18" height="12" rx="2" fill="#7fc8d8" stroke="#1f231b" stroke-width="1.5"/>
+            <rect x="-30" y="-4" width="17" height="8" fill="#3f6f86" stroke="#1f231b" stroke-width="1.5"/>
+            <rect x="13" y="-4" width="17" height="8" fill="#3f6f86" stroke="#1f231b" stroke-width="1.5"/>
+            <path d="M-24 -4V4M-18 -4V4M19 -4V4M25 -4V4" stroke="#1f231b" stroke-width="1"/>
+          </g>
+          <text x="384" y="70" fill="#7fc8d8">SPACE</text>
+          <text x="196" y="96" fill="#e3b65a">AIRBORNE</text>
+          <text x="60" y="150" fill="#e3b65a">GROUND</text>
+          <text x="248" y="196" fill="#7fc8d8">MARITIME</text>
           <path class="hill" d="M0 214C60 206 110 210 170 212C240 214 300 200 360 206C410 210 450 204 480 208V250H0Z" fill="#3d4a2a"/>
-          <path d="M0 226C80 220 160 228 240 224C320 220 400 230 480 224M0 238C90 234 170 242 260 238C340 234 410 242 480 238" fill="none" stroke="#5b6b3a" stroke-width="1.5"/>
-          <text x="12" y="246" fill="#d6d2bf">SENSOR: EO/IR · LINK: OK · PED: ON</text>
+          <path d="M196 218C230 214 270 216 300 213C330 211 350 216 372 214V250H196Z" fill="#2f4a5a"/>
+          <path d="M204 226Q214 222 224 226T244 226T264 226T284 226T304 226T324 226T344 226T364 226M204 238Q214 234 224 238T244 238T264 238T284 238T304 238T324 238T344 238T364 238" fill="none" stroke="#7fc8d8" stroke-opacity="0.6" stroke-width="1.4"/>
+          <g class="ship">
+            <path d="M242 212H326L316 224H252Z" fill="#8a9a9f" stroke="#1f231b" stroke-width="2" stroke-linejoin="round"/>
+            <rect x="272" y="198" width="30" height="14" fill="#a9b6ba" stroke="#1f231b" stroke-width="2"/>
+            <path d="M287 198V186M280 190H294" stroke="#1f231b" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <g class="uav">
+            <ellipse cx="222" cy="117" rx="14" ry="4" fill="#d6d2bf" stroke="#1f231b" stroke-width="1.5"/>
+            <path d="M212 117L200 108M232 117L246 108M222 113V106" stroke="#1f231b" stroke-width="2" stroke-linecap="round"/>
+            <path d="M196 106H206M240 106H252" stroke="#e3b65a" stroke-width="2" stroke-linecap="round"/>
+          </g>
           <path class="trajectory" d="M230 125Q319 -40 408 182" fill="none" stroke="#f3efdf" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="3 6"/>
           <g id="target-grid" fill="none" stroke="currentColor" stroke-width="1.5">
             <rect x="376" y="150" width="64" height="64"/>
@@ -344,27 +363,25 @@
             <circle cx="408" cy="182" r="9"/>
             <path d="M408 166V177M408 187V198M392 182H403M413 182H424"/>
             <circle class="target-pulse" cx="408" cy="182" r="14" stroke-width="2.5"/>
-            <text x="376" y="143" fill="currentColor" stroke="none">OBJ AREA 1001</text>
+            <text x="376" y="143" fill="currentColor" stroke="none">AREA OF INTEREST</text>
           </g>
           <g id="howitzer">
-            <ellipse cx="124" cy="214" rx="82" ry="5" fill="#1b1f16" fill-opacity="0.5"/>
-            <rect x="70" y="190" width="110" height="22" rx="5" fill="#586636" stroke="#1f231b" stroke-width="2"/>
-            <rect x="82" y="176" width="40" height="16" rx="3" fill="#6b7a45" stroke="#1f231b" stroke-width="2"/>
-            <path d="M138 190V160" stroke="#1f231b" stroke-width="5" stroke-linecap="round"/>
-            <g transform="translate(138 158) rotate(-32)">
+            <ellipse cx="110" cy="214" rx="50" ry="5" fill="#1b1f16" fill-opacity="0.5"/>
+            <path d="M84 212L96 168H124L136 212Z" fill="#586636" stroke="#1f231b" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M92 196H128M98 182H122M92 212L124 168M128 212L96 168" stroke="#1f231b" stroke-width="1.5"/>
+            <rect x="96" y="160" width="28" height="10" rx="2" fill="#6b7a45" stroke="#1f231b" stroke-width="2"/>
+            <g transform="translate(110 156) rotate(-20)">
               <g id="barrel">
-                <path d="M-30 0Q0 -30 30 0Z" fill="#a3b36d" stroke="#1f231b" stroke-width="2" stroke-linejoin="round"/>
-                <path d="M0 0V14" stroke="#e3b65a" stroke-width="3" stroke-linecap="round"/>
+                <path d="M-26 0Q0 -30 26 0Z" fill="#a3b36d" stroke="#1f231b" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M0 0V-14" stroke="#e3b65a" stroke-width="3" stroke-linecap="round"/>
               </g>
               <g id="muzzle-flash">
                 <circle cx="0" cy="-8" r="16" fill="none" stroke="#ffd166" stroke-width="3"/>
                 <circle cx="0" cy="-8" r="26" fill="none" stroke="#ff8a3d" stroke-width="2"/>
               </g>
             </g>
-            <circle cx="98" cy="214" r="9" fill="#2a2f24" stroke="#1f231b" stroke-width="2"/>
-            <circle cx="160" cy="214" r="9" fill="#2a2f24" stroke="#1f231b" stroke-width="2"/>
           </g>
-          <g id="smoke" fill="#e9e5d6">
+          <g id="smoke" fill="#7fc8d8">
             <circle class="smoke-puff" cx="232" cy="121" r="7"/>
             <circle class="smoke-puff" cx="241" cy="115" r="6"/>
             <circle class="smoke-puff" cx="228" cy="112" r="5"/>

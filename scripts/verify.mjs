@@ -934,7 +934,7 @@ await test('Hero artwork is an aria-hidden inline SVG with the howitzer, barrel,
   }
   const hero = document.getElementById('hero-art');
   assert.ok(hero, 'the landing hero must contain the fire-mission art');
-  assert.match(hero.textContent, /ISR TASKING/, 'decorative ISR labels belong inside the aria-hidden art');
+  assert.match(hero.textContent, /COLLECT/, 'decorative ISR labels belong inside the aria-hidden art');
   assert.ok(findAll(hero, node => node.localName === 'path' && /\btrajectory\b/.test(node.getAttribute('class') ?? '')).length, 'a static projectile arc must be drawn');
   assert.ok(findAll(hero, node => /\brange-rings\b/.test(node.getAttribute('class') ?? '')).length, 'range rings must be drawn');
 });
