@@ -188,7 +188,7 @@
       "HALE vehicles can operate extremely high for many hours"
     ],
     "answer": 1,
-    "explanation": "Slide 36 says HALE vehicles operate for many hours since no pilot limits them.",
+    "explanation": "Slide 36 says HALE vehicles can operate extremely high for many hours since the pilot has no limitations.",
     "sourceSlides": [
       32,
       35,
@@ -252,7 +252,7 @@
       "Flawed: satellites are never useful for maritime ISR because ships move too quickly for orbital passes",
       "Flawed: submarines are the backbone and the surface fleet is the most invisible asset in the military",
       "Flawed: aviation is the backbone of maritime ISR, with the surface fleet playing only a supporting part",
-      "Sound: submarines are most invisible, the surface fleet is the backbone, and satellite orbits can be tracked by targets"
+      "Sound: submarines are the most invisible asset, the surface fleet is the backbone, and satellites are incredible for observing huge areas"
     ],
     "answer": 3,
     "explanation": "Slides 39-41 support each role.",

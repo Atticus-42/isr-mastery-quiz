@@ -128,7 +128,7 @@
     "tags": [
       "HALE"
     ],
-    "prompt": "A planner wants a platform that can operate extremely high for many hours because no pilot limits it. Which platform fits?",
+    "prompt": "A planner wants a platform that can operate extremely high for many hours since the pilot has no limitations. Which platform fits?",
     "options": [
       "A manned reconnaissance aircraft",
       "A ground surveillance radar",
