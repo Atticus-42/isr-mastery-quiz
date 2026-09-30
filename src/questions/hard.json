@@ -50,15 +50,15 @@
       "ISR sources",
       "ISR assets"
     ],
-    "prompt": "A commander asks which claim about ISR sources and assets is supported by the lesson.",
+    "prompt": "A Philippine Army brigade S2's collection plan lists intercepted radio traffic, radar and infrared imagery, and a human intelligence team in coastal barangays. The S3 says only satellite optical imagery counts as ISR. Which assessment fits the lesson?",
     "options": [
-      "Sources are limited to optical imaging alone, and human intelligence teams are not treated as ISR assets",
-      "Assets are limited to satellites and unmanned aircraft, excluding ground, sea and human intelligence teams",
-      "Radar and infrared are excluded because ISR relies on electronic communications and optical sources only",
-      "Sources include electronic communications, optical, radar and infrared imaging, and assets include human intelligence teams"
+      "S3 is right: ISR sources are limited to optical imaging from satellites",
+      "S3 is right: human intelligence teams are not treated as ISR assets",
+      "S3 is partly right: radar and infrared fall outside ISR sources",
+      "S2 is right: every listed source and asset falls within ISR"
     ],
     "answer": 3,
-    "explanation": "Slide 23 lists these sources and assets.",
+    "explanation": "Slide 23 lists electronic communications, optical, radar and infrared imaging as sources, and includes human intelligence teams among ISR assets.",
     "sourceSlides": [
       23
     ]
@@ -93,15 +93,15 @@
       "ISR systems",
       "unstructured data"
     ],
-    "prompt": "A staff receives unstructured imagery, text and signals feeds from small mobile devices and a satellite. Which statement is most consistent with the lesson?",
+    "prompt": "A Philippine Army staff receives unstructured imagery, text and signals feeds from small mobile devices and a satellite. The chief of staff wants to cut the mobile-device feeds because 'only satellites give usable insights.' Which advice fits the lesson?",
     "options": [
-      "ISR systems process only structured data and ignore unstructured feeds from small mobile devices and satellites",
-      "Only large satellites produce insights that commanders can use, because small mobile devices are too limited",
-      "Faster information flow tends to slow decision-making because staffs become overloaded with feeds",
-      "ISR systems from mobile devices to satellites use unstructured data to extract insights that speed better decisions"
+      "Cut them: ISR systems handle only structured data, not raw feeds",
+      "Cut them: only large satellites yield insights commanders can use",
+      "Cut them: faster information flow tends to slow decision-making",
+      "Keep them: ISR systems of all sizes turn unstructured data into insights"
     ],
     "answer": 3,
-    "explanation": "Slide 29 describes these ISR systems and their insights.",
+    "explanation": "Slide 29 says ISR systems range from mobile devices to satellites and use unstructured data to extract insights that let warfighters make better decisions.",
     "sourceSlides": [
       29
     ]
@@ -157,15 +157,15 @@
       "manned reconnaissance aircraft",
       "UAV"
     ],
-    "prompt": "An instructor asks which airborne system is the traditional approach and which offers flexible, persistent strike after target identification.",
+    "prompt": "A Philippine Army task force has a manned reconnaissance aircraft and an armed UAV. One must fill the traditional aerial reconnaissance role; the other must engage targets identified through ISR. Which assignment fits?",
     "options": [
-      "UAVs are the traditional approach, while manned reconnaissance aircraft provide flexible persistent strike",
-      "HALE vehicles are the traditional approach, while manned aircraft provide flexible persistent strike",
-      "Manned reconnaissance aircraft are traditional; UAVs with payloads give flexible persistent strike",
-      "Manned aircraft are the traditional approach and also provide flexible persistent strike after target identification"
+      "Armed UAV for traditional reconnaissance; manned aircraft for strike",
+      "Manned aircraft for both the reconnaissance and the strike roles",
+      "Manned aircraft for traditional reconnaissance; armed UAV for strike",
+      "Armed UAV for both the reconnaissance and the strike roles"
     ],
     "answer": 2,
-    "explanation": "Slides 32 and 35 support this pairing.",
+    "explanation": "Slide 35 calls manned reconnaissance aircraft the traditional approach; slide 32 says UAVs carrying payloads provide flexible, persistent strike against ISR-identified targets.",
     "sourceSlides": [
       32,
       35
@@ -180,7 +180,7 @@
       "UAV",
       "manned reconnaissance aircraft"
     ],
-    "prompt": "A plan makes four airborne statements. Which one is wrong?",
+    "prompt": "A Philippine Army division ISR planner drafts four statements for the commander's brief on airborne assets. Which statement must the S2 correct before the brief?",
     "options": [
       "UAVs with missiles can engage targets identified through ISR",
       "HALE vehicles are limited by pilot endurance to short sorties",
@@ -188,7 +188,7 @@
       "HALE vehicles can operate extremely high for many hours"
     ],
     "answer": 1,
-    "explanation": "Slide 36 says HALE vehicles can operate extremely high for many hours since the pilot has no limitations.",
+    "explanation": "Slide 36 says HALE vehicles can operate extremely high for many hours since the pilot has no limitations, so the claim of short sorties limited by pilot endurance is wrong.",
     "sourceSlides": [
       32,
       35,
@@ -225,7 +225,7 @@
       "terrestrial-based benefits",
       "company UAS"
     ],
-    "prompt": "A company commander with organic UAS asks which benefits of terrestrial-based ISR apply.",
+    "prompt": "A Philippine Army company commander needs live video of a suspected enemy camp, wants to reposition the collector on his own authority, and may need to act once the target is confirmed. Which benefits make organic company UAS the right fit?",
     "options": [
       "Unrestricted worldwide coverage, beyond-line-of-sight coverage, and denied-area collection",
       "Unclassified imagery, easy access, and multinational sharing",
@@ -233,7 +233,7 @@
       "Silent operation, invisibility to the enemy, and surface-fleet support"
     ],
     "answer": 2,
-    "explanation": "Slide 44 lists these terrestrial benefits.",
+    "explanation": "Slide 44 lists terrestrial-based ISR benefits: near-real-time full-motion video relay, local commander approval for relocation and tasking, and deployment of lethal or non-lethal effects after target identification.",
     "sourceSlides": [
       44
     ]

@@ -131,15 +131,15 @@
       "HALE",
       "manned reconnaissance aircraft"
     ],
-    "prompt": "A unit needs very high, long-duration coverage. Which choice and reason fit the lesson?",
+    "prompt": "A Philippine Army division needs an airborne asset to stay very high over a wide mountainous area for many hours at a time. Which choice and reason fit the lesson?",
     "options": [
-      "A manned reconnaissance aircraft, since its crew can stay extremely high for many hours",
-      "A HALE vehicle, since it can operate extremely high for many hours because the pilot has no limitations",
-      "A ground radar, since it can be dropped behind enemy lines",
-      "A manned aircraft, since World War I use proves its endurance"
+      "A manned reconnaissance aircraft, since its crew can stay aloft for hours",
+      "A HALE vehicle, since it operates very high for hours without pilot limits",
+      "A ground surveillance radar, since it can be fixed on a low tower",
+      "A manned aircraft, since it has been used since World War I"
     ],
     "answer": 1,
-    "explanation": "Slide 36 ties HALE endurance to having no pilot limitations.",
+    "explanation": "Slide 36 says a HALE vehicle can operate extremely high for many hours since the pilot has no limitations; slide 35's history of manned aircraft does not establish that endurance.",
     "sourceSlides": [
       35,
       36
@@ -173,7 +173,7 @@
     "tags": [
       "manned reconnaissance aircraft"
     ],
-    "prompt": "An instructor corrects a student's timeline for manned reconnaissance aircraft. Which timeline matches the lesson?",
+    "prompt": "A Philippine Army staff officer argues manned reconnaissance aircraft are unproven for aerial ISR and should be replaced outright. Which history best counters the argument?",
     "options": [
       "First used in World War II and effective since World War I",
       "Introduced with satellites and effective since the Cold War",
@@ -181,7 +181,7 @@
       "Used since World War I and with great effect since World War II"
     ],
     "answer": 3,
-    "explanation": "Slide 35 says manned aircraft have been used since World War I and with great effect since World War II.",
+    "explanation": "Slide 35 says manned aircraft have been used for reconnaissance since World War I and with great effect since World War II.",
     "sourceSlides": [
       35
     ]
@@ -213,7 +213,7 @@
     "tags": [
       "sensor networks"
     ],
-    "prompt": "A planner calls dropping sensors behind enemy lines untested. What does the lesson say?",
+    "prompt": "A Philippine Army S2 proposes seeding sensors behind enemy lines along an armed group's infiltration trail; the S3 rejects it as an untested concept. Which response is best supported?",
     "options": [
       "Sensor networks are a recent development used only by space-based forces and satellite operators",
       "Sensor networks are nothing new; Allied forces have dropped sensors behind enemy lines for decades",
@@ -221,7 +221,7 @@
       "Sensor networks work only when installed aboard surface ships of a naval fleet"
     ],
     "answer": 1,
-    "explanation": "Slide 38 says sensors have been dropped behind enemy lines for decades.",
+    "explanation": "Slide 38 says sensor networks are nothing new; Allied forces have been dropping sensors behind enemy lines for decades.",
     "sourceSlides": [
       38
     ]
@@ -256,7 +256,7 @@
       "surface fleet",
       "aviation branches"
     ],
-    "prompt": "An exercise treats aviation as the foundation of maritime ISR. What does the lesson say?",
+    "prompt": "In a joint exercise, a maritime ISR plan shown to Philippine Army planners starts from naval aviation and treats surface ships as an afterthought. Which critique fits the lesson?",
     "options": [
       "Aviation branches are not important to maritime ISR",
       "Submarines rather than the surface fleet are the backbone",
@@ -264,7 +264,7 @@
       "Aviation branches are crucial, but it all begins with surface warfare"
     ],
     "answer": 3,
-    "explanation": "Slide 39 says aviation is crucial but naval strength begins with the surface fleet.",
+    "explanation": "Slide 39 says aviation branches are crucial, but it all begins with surface warfare, the backbone of the Navy.",
     "sourceSlides": [
       39
     ]

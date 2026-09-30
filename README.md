@@ -6,7 +6,7 @@ Questions use only the substantive slides 21-58 of the supplied presentation. In
 
 No login, payment, analytics, cookies, advertising, external fonts, images, scripts or runtime libraries. Answers and scores stay in browser memory.
 
-`src/questions/` holds the three banks (generated from `scripts/author-banks.mjs`), `src/template.html` is the page source, and `scripts/build.mjs` produces the self-contained `index.html`. Test gate:
+`src/questions/` holds the three banks, `src/template.html` is the page source, and `scripts/build.mjs` produces the self-contained `index.html`. Test gate:
 
 ```sh
 node scripts/build.mjs && node scripts/verify.mjs
