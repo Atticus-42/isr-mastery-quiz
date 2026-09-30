@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ISR Operations Mastery Quiz</title>
+  <style>
+    /* ISR palette. Every text pair is WCAG AA (see Task 6 report). */
+    :root {
+      --color-bg: #e7e8d6;
+      --color-surface: #fbfaf3;
+      --color-text: #1d2119;
+      --color-muted: #464c3c;
+      --color-border: #7a8068;
+      --color-accent: #3f4d22;
+      --color-accent-hover: #2f3a19;
+      --color-accent-text: #ffffff;
+      --color-charcoal: #23281e;
+      --color-olive-deep: #34402a;
+      --color-terrain: #5b6b3a;
+      --color-brass: #e3b65a;
+      --color-hero-text: #f3efdf;
+      --color-hero-muted: #d6d2bf;
+      --color-warning-bg: #fff0c7;
+      --color-warning-border: #9a5a00;
+      --color-warning-text: #7a3e00;
+      --color-correct: #1c6530;
+      --color-incorrect: #9e2418;
+      --color-focus: #1a4fd1;
+      --mode-accent: var(--color-accent);
+      --mode-tint: var(--color-surface);
+      --mode-glow: var(--color-brass);
+    }
+    /* Difficulty identities. The difficulty is always also named in text. */
+    .theme-easy, .mode-easy { --mode-accent: #2d6a2f; --mode-tint: #eef1e3; --mode-glow: #8fd17a; }
+    .theme-medium, .mode-medium { --mode-accent: #8a5700; --mode-tint: #f7eed6; --mode-glow: #f2b441; }
+    .theme-hard, .mode-hard { --mode-accent: #a63d17; --mode-tint: #f8e6dc; --mode-glow: #ff8a5c; }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    h1, h2, h3, h4 { line-height: 1.25; }
+
+    /* Decorative tactical-map layer: fixed, clipped and inert, so it never adds page width. */
+    .terrain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .terrain svg { display: block; width: 100%; height: 100%; }
+
+    /* Fire-mission hero */
+    .hero {
+      background: linear-gradient(135deg, var(--color-charcoal) 0%, var(--color-olive-deep) 100%);
+      color: var(--color-hero-text);
+      border-bottom: 6px solid var(--mode-glow);
+      overflow: hidden;
+    }
+    .hero-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+      gap: 1.5rem;
+      align-items: center;
+      width: 100%;
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+    }
+    .hero-copy { min-width: 0; }
+    .eyebrow { margin: 0; font-weight: 700; letter-spacing: 0.04em; color: var(--color-brass); }
+    h1 { margin: 0.25rem 0 0.5rem; font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem); }
+    .hero-lede { margin: 0; color: var(--color-hero-muted); max-width: 34rem; }
+    .hero-art { min-width: 0; }
+    .hero-art svg { display: block; width: 100%; max-width: 100%; height: auto; }
+    .hero-art text { font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; }
+    body[data-view="quiz"] .hero-inner, body[data-view="results"] .hero-inner { padding-top: 1rem; padding-bottom: 1rem; }
+    body[data-view="quiz"] .hero-art svg, body[data-view="results"] .hero-art svg { max-height: 12rem; }
+
+    /* Artwork parts. Rest states are the static artwork shown with reduced motion. */
+    #target-grid { color: var(--mode-glow); }
+    #muzzle-flash { opacity: 0; transform-box: fill-box; transform-origin: 0% 50%; }
+    #projectile { opacity: 0; transform: translate(230px, 125px); }
+    #smoke .smoke-puff { opacity: 0; transform-box: fill-box; transform-origin: center; }
+    #target-grid .target-pulse { opacity: 0; transform-box: fill-box; transform-origin: center; }
+
+    /* One fire mission (4 seconds) plays when the art appears; nothing loops, so no pause control is needed. */
+    #barrel { animation: recoil 4s ease-out 1 both; }
+    #muzzle-flash { animation: muzzle-flash 4s ease-out 1 both; }
+    #projectile { animation: projectile-arc 4s linear 1 both; }
+    #smoke .smoke-puff { animation: smoke-drift 4s ease-out 1 both; }
+    #smoke .smoke-puff:nth-child(2) { animation-delay: 0.12s; }
+    #smoke .smoke-puff:nth-child(3) { animation-delay: 0.24s; }
+    #target-grid .target-pulse { animation: target-pulse 4s ease-out 1 both; }
+
+    @keyframes recoil {
+      0%, 15% { transform: translateX(0); }
+      16.5% { transform: translateX(-10px); }
+      32%, 100% { transform: translateX(0); }
+    }
+    @keyframes muzzle-flash {
+      0%, 15% { opacity: 0; transform: scale(0.3); }
+      16.5% { opacity: 1; transform: scale(1); }
+      22%, 100% { opacity: 0; transform: scale(1.2); }
+    }
+    @keyframes smoke-drift {
+      0%, 16% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+      21% { opacity: 0.85; transform: translate(4px, -4px) scale(0.9); }
+      70%, 100% { opacity: 0; transform: translate(30px, -34px) scale(2.2); }
+    }
+    @keyframes projectile-arc {
+      0%, 15.9% { opacity: 0; transform: translate(230px, 125px); }
+      16% { opacity: 1; transform: translate(230px, 125px); }
+      21% { transform: translate(252.3px, 89.8px); }
+      26% { transform: translate(274.5px, 66.7px); }
+      31% { transform: translate(296.8px, 55.7px); }
+      36% { transform: translate(319px, 56.8px); }
+      41% { transform: translate(341.3px, 69.9px); }
+      46% { transform: translate(363.5px, 95.2px); }
+      51% { transform: translate(385.8px, 132.5px); }
+      56% { opacity: 1; transform: translate(408px, 182px); }
+      57%, 100% { opacity: 0; transform: translate(408px, 182px); }
+    }
+    @keyframes target-pulse {
+      0%, 56% { opacity: 0; transform: scale(0.3); }
+      58% { opacity: 1; transform: scale(0.6); }
+      85%, 100% { opacity: 0; transform: scale(2.6); }
+    }
+    @keyframes view-enter {
+      from { opacity: 0; transform: translateY(0.5rem); }
+      to { opacity: 1; transform: none; }
+    }
+
+    /* Main card */
+    .app {
+      width: calc(100% - 2rem);
+      max-width: 52rem;
+      margin: 1.5rem auto 2rem;
+      padding: 1.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-top: 6px solid var(--mode-accent);
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 10px rgba(35, 40, 30, 0.18);
+    }
+    .view { animation: view-enter 0.3s ease-out both; }
+    .view > h2:first-child { margin-top: 0; }
+
+    button {
+      font: inherit;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0.625rem 1rem;
+      border: 2px solid var(--color-accent);
+      border-radius: 0.375rem;
+      background: var(--color-accent);
+      color: var(--color-accent-text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    button:hover:not(:disabled) { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
+    button.secondary { background: var(--color-surface); color: var(--color-accent); }
+    button.secondary:hover:not(:disabled) { background: #eef0e2; color: var(--color-accent-hover); }
+    button:disabled { cursor: not-allowed; opacity: 0.5; }
+    :focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+
+    .study-warning {
+      border: 2px solid var(--color-warning-border);
+      border-left-width: 8px;
+      border-radius: 0.5rem;
+      background: var(--color-warning-bg);
+      padding: 1rem;
+    }
+    .study-warning p { margin-top: 0; }
+    .study-warning strong { color: var(--color-warning-text); }
+    .study-confirm {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      min-height: 44px;
+      padding: 0.5rem 0;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .study-confirm input { flex: none; width: 1.5rem; height: 1.5rem; margin: 0.1rem 0 0; accent-color: var(--color-accent); }
+
+    .mode-list {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    }
+    .mode-button {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+      text-align: left;
+      background: var(--mode-tint);
+      color: var(--color-text);
+      border: 2px solid var(--color-border);
+      border-left: 10px solid var(--mode-accent);
+    }
+    .mode-button:hover:not(:disabled) { background: var(--color-surface); border-color: var(--mode-accent); color: var(--color-text); }
+    .mode-name { font-size: 1.125rem; font-weight: 700; color: var(--mode-accent); }
+    .mode-desc { font-size: 0.9375rem; font-weight: 400; }
+    .privacy-note, .question-category, .results-reminder { color: var(--color-muted); }
+
+    progress { width: 100%; height: 0.75rem; accent-color: var(--mode-accent); }
+    fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+    legend { display: block; max-width: 100%; margin-bottom: 0.75rem; padding: 0; font-size: 1.125rem; font-weight: 600; white-space: normal; }
+    .option {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      min-height: 44px;
+      margin-bottom: 0.5rem;
+      padding: 0.75rem;
+      border: 2px solid var(--color-border);
+      border-radius: 0.5rem;
+      background: var(--color-surface);
+      cursor: pointer;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+    .option:hover:not(.option-correct):not(.option-incorrect) { border-color: var(--mode-accent); background: var(--mode-tint); }
+    .option input { flex: none; width: 1.25rem; height: 1.25rem; margin: 0.15rem 0 0; accent-color: var(--mode-accent); }
+    .option-body { min-width: 0; }
+    .option-letter { font-weight: 700; }
+    .option-tag { display: block; font-size: 0.875rem; font-weight: 700; }
+    .option-correct { border-color: var(--color-correct); border-width: 3px; }
+    .option-correct .option-tag { color: var(--color-correct); }
+    .option-incorrect { border-color: var(--color-incorrect); border-width: 3px; border-style: dashed; }
+    .option-incorrect .option-tag { color: var(--color-incorrect); }
+    .validation-message { color: var(--color-incorrect); font-weight: 600; }
+    .feedback { margin-top: 1rem; padding: 0.75rem 1rem; border-left: 6px solid var(--color-border); background: var(--mode-tint); animation: view-enter 0.25s ease-out both; }
+    .feedback p { margin: 0.25rem 0; }
+    .feedback-correct { border-left-color: var(--color-correct); }
+    .feedback-incorrect { border-left-color: var(--color-incorrect); }
+    .quiz-actions, .results-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+    .table-wrap { max-width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; background: var(--color-surface); }
+    caption { text-align: left; padding-bottom: 0.5rem; }
+    th, td { padding: 0.5rem; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: top; }
+    .review-list { padding-left: 1.25rem; }
+    .review-item { margin-bottom: 1.25rem; }
+    .review-item p { margin: 0.25rem 0; }
+
+    /* Narrow screens: stack the hero and every control row. */
+    @media (max-width: 760px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 0.75rem; padding: 1rem; }
+      .hero-art svg { max-height: 13rem; margin: 0 auto; }
+      body[data-view="quiz"] .hero-art, body[data-view="results"] .hero-art, body[data-view="quiz"] .hero-lede, body[data-view="results"] .hero-lede { display: none; }
+      .app { width: calc(100% - 1rem); margin: 0.75rem auto 1.5rem; padding: 1rem; }
+      .mode-list { grid-template-columns: 1fr; }
+      .quiz-actions, .results-actions { flex-direction: column; }
+      .quiz-actions button, .results-actions button { width: 100%; }
+      th, td { padding: 0.375rem; }
+    }
+
+    /* Reduced motion: stop every animation and transition; the static artwork stays visible. */
+    @media (prefers-reduced-motion: reduce) {
+      #barrel, #muzzle-flash, #projectile, #smoke .smoke-puff, #smoke .smoke-puff:nth-child(2), #smoke .smoke-puff:nth-child(3), #target-grid .target-pulse, .view, .feedback, button, .option {
+        animation: none !important;
+        transition: none !important;
+      }
+      #muzzle-flash, #smoke .smoke-puff { opacity: 0; }
+      #projectile { opacity: 1; transform: translate(319px, 56.8px); }
+      #target-grid .target-pulse { opacity: 0.6; transform: none; }
+    }
+
+    @media print {
+      body { background: #ffffff; }
+      .terrain, .hero-art, .results-actions, .noscript { display: none !important; }
+      .hero { background: #ffffff; color: #000000; border-bottom: 2px solid #000000; }
+      .eyebrow, .hero-lede { color: #000000; }
+      .app { box-shadow: none; border: 0; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body data-view="landing">
+  <div class="terrain" aria-hidden="true">
+    <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="#5b6b3a" stroke-opacity="0.16" stroke-width="1">
+        <path d="M0 100H1200M0 200H1200M0 300H1200M0 400H1200M0 500H1200M0 600H1200M0 700H1200M100 0V800M200 0V800M300 0V800M400 0V800M500 0V800M600 0V800M700 0V800M800 0V800M900 0V800M1000 0V800M1100 0V800"/>
+      </g>
+      <g fill="none" stroke="#5b6b3a" stroke-opacity="0.3" stroke-width="1.5">
+        <path d="M200 260C260 180 400 170 460 240C520 310 470 400 380 410C280 420 150 350 200 260Z"/>
+        <path d="M250 270C290 220 390 215 425 260C460 305 430 360 370 365C300 370 220 320 250 270Z"/>
+        <path d="M300 280C330 255 380 255 395 285C410 315 380 335 350 335C310 335 285 305 300 280Z"/>
+        <path d="M800 120C900 60 1080 100 1100 200C1120 300 980 340 880 300C780 260 720 170 800 120Z"/>
+        <path d="M850 150C920 110 1040 140 1050 205C1060 270 970 290 900 265C830 240 800 180 850 150Z"/>
+        <path d="M900 180C950 160 1000 180 1005 210C1010 240 960 250 925 238C890 226 870 195 900 180Z"/>
+        <path d="M0 620C200 580 400 660 600 610C800 560 1000 640 1200 600"/>
+        <path d="M0 680C220 640 420 720 620 670C820 620 1010 700 1200 660"/>
+      </g>
+      <g fill="none" stroke="#9a5a00" stroke-opacity="0.2" stroke-width="1.5" stroke-dasharray="6 8">
+        <circle cx="1100" cy="720" r="200"/>
+        <circle cx="1100" cy="720" r="350"/>
+        <circle cx="1100" cy="720" r="500"/>
+      </g>
+    </svg>
+  </div>
+
+  <header class="site-header hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">Philippine Army · Signal School</p>
+        <h1>ISR Operations Mastery Quiz</h1>
+        <p class="hero-lede">A practice aid for the Introduction to ISR Operations lesson: 75 situational questions across Easy, Medium, and Hard.</p>
+      </div>
+      <div id="hero-art" class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 480 250" aria-hidden="true" focusable="false">
+          <path class="map-grid" d="M0 50H480M0 100H480M0 150H480M0 200H480M80 0V250M160 0V250M240 0V250M320 0V250M400 0V250" fill="none" stroke="#f3efdf" stroke-opacity="0.08" stroke-width="1"/>
+          <g class="range-rings" fill="none" stroke="#e3b65a" stroke-opacity="0.4" stroke-width="1.2" stroke-dasharray="4 6">
+            <circle cx="140" cy="200" r="110"/>
+            <circle cx="140" cy="200" r="190"/>
+            <circle cx="140" cy="200" r="270"/>
+          </g>
+          <text x="146" y="86" fill="#e3b65a" fill-opacity="0.85">RNG 40 KM</text>
+          <text x="146" y="18" fill="#e3b65a" fill-opacity="0.85">RNG 80 KM</text>
+          <text x="262" y="18" fill="#e3b65a">ISR TASKING · TEAM A</text>
+          <text x="262" y="31" fill="#d6d2bf">GRID 51P TT 3341 1276 · UAS 02</text>
+          <path class="hill" d="M0 214C60 206 110 210 170 212C240 214 300 200 360 206C410 210 450 204 480 208V250H0Z" fill="#3d4a2a"/>
+          <path d="M0 226C80 220 160 228 240 224C320 220 400 230 480 224M0 238C90 234 170 242 260 238C340 234 410 242 480 238" fill="none" stroke="#5b6b3a" stroke-width="1.5"/>
+          <text x="12" y="246" fill="#d6d2bf">SENSOR: EO/IR · LINK: OK · PED: ON</text>
+          <path class="trajectory" d="M230 125Q319 -40 408 182" fill="none" stroke="#f3efdf" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="3 6"/>
+          <g id="target-grid" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="376" y="150" width="64" height="64"/>
+            <path d="M392 150V214M408 150V214M424 150V214M376 166H440M376 182H440M376 198H440" stroke-opacity="0.45" stroke-width="1"/>
+            <circle cx="408" cy="182" r="9"/>
+            <path d="M408 166V177M408 187V198M392 182H403M413 182H424"/>
+            <circle class="target-pulse" cx="408" cy="182" r="14" stroke-width="2.5"/>
+            <text x="376" y="143" fill="currentColor" stroke="none">OBJ AREA 1001</text>
+          </g>
+          <g id="howitzer">
+            <ellipse cx="124" cy="214" rx="82" ry="5" fill="#1b1f16" fill-opacity="0.5"/>
+            <rect x="70" y="190" width="110" height="22" rx="5" fill="#586636" stroke="#1f231b" stroke-width="2"/>
+            <rect x="82" y="176" width="40" height="16" rx="3" fill="#6b7a45" stroke="#1f231b" stroke-width="2"/>
+            <path d="M138 190V160" stroke="#1f231b" stroke-width="5" stroke-linecap="round"/>
+            <g transform="translate(138 158) rotate(-32)">
+              <g id="barrel">
+                <path d="M-30 0Q0 -30 30 0Z" fill="#a3b36d" stroke="#1f231b" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M0 0V14" stroke="#e3b65a" stroke-width="3" stroke-linecap="round"/>
+              </g>
+              <g id="muzzle-flash">
+                <circle cx="0" cy="-8" r="16" fill="none" stroke="#ffd166" stroke-width="3"/>
+                <circle cx="0" cy="-8" r="26" fill="none" stroke="#ff8a3d" stroke-width="2"/>
+              </g>
+            </g>
+            <circle cx="98" cy="214" r="9" fill="#2a2f24" stroke="#1f231b" stroke-width="2"/>
+            <circle cx="160" cy="214" r="9" fill="#2a2f24" stroke="#1f231b" stroke-width="2"/>
+          </g>
+          <g id="smoke" fill="#e9e5d6">
+            <circle class="smoke-puff" cx="232" cy="121" r="7"/>
+            <circle class="smoke-puff" cx="241" cy="115" r="6"/>
+            <circle class="smoke-puff" cx="228" cy="112" r="5"/>
+          </g>
+          <g id="projectile">
+            <path d="M-9 0L9 0M0 -6L0 6M-9 -6L-3 -3M9 -6L3 -3M-9 6L-3 3M9 6L3 3" stroke="#e3b65a" stroke-width="2.5" stroke-linecap="round"/><circle r="3" fill="#f3efdf" stroke="#1f231b" stroke-width="1.5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <main id="app" class="app">
+    <noscript><p class="noscript">This quiz needs JavaScript enabled in your browser.</p></noscript>
+
+    <section id="view-landing" class="view view-landing" aria-labelledby="landing-heading">
+      <h2 id="landing-heading">Before you begin</h2>
+      <div id="study-warning" class="study-warning">
+        <p><strong>This mock examination is a practice aid only.</strong> It cannot replace studying the complete Introduction to ISR Operations lesson, and repeated attempts are not a substitute for that study.</p>
+        <label class="study-confirm" for="study-confirm">
+          <input type="checkbox" id="study-confirm" autocomplete="off">
+          <span>I understand that I must study the complete lesson and not rely only on this mock examination.</span>
+        </label>
+      </div>
+
+      <h2 id="difficulty-heading" tabindex="-1">Choose a difficulty</h2>
+      <p id="mode-hint" class="mode-hint" role="status" aria-live="polite">Check the study confirmation above to enable the difficulty buttons.</p>
+      <div id="mode-list" class="mode-list" role="group" aria-labelledby="difficulty-heading">
+        <button type="button" id="mode-easy" class="mode-button mode-easy" disabled aria-describedby="mode-hint">
+          <span class="mode-name">Easy</span>
+          <span class="mode-desc">25 questions. One primary doctrinal judgment in each situation.</span>
+        </button>
+        <button type="button" id="mode-medium" class="mode-button mode-medium" disabled aria-describedby="mode-hint">
+          <span class="mode-name">Medium</span>
+          <span class="mode-desc">25 questions. Compare, diagnose, and choose among plausible options.</span>
+        </button>
+        <button type="button" id="mode-hard" class="mode-button mode-hard" disabled aria-describedby="mode-hint">
+          <span class="mode-name">Hard</span>
+          <span class="mode-desc">25 questions. Integrate several concepts under competing constraints.</span>
+        </button>
+      </div>
+      <p class="privacy-note">No login and no tracking. Your answers stay in this browser tab and are cleared when you refresh or close it.</p>
+    </section>
+
+    <section id="view-quiz" class="view view-quiz" hidden aria-labelledby="quiz-heading">
+      <h2 id="quiz-heading">Examination</h2>
+      <div class="quiz-progress">
+        <label for="quiz-progress">Answers checked</label>
+        <progress id="quiz-progress" max="25" value="0"></progress>
+        <p id="quiz-status" class="quiz-status" role="status" aria-live="polite"></p>
+      </div>
+      <h3 id="question-heading" class="question-heading" tabindex="-1">Question</h3>
+      <p id="question-category" class="question-category"></p>
+      <div id="question-area" class="question-area"></div>
+      <p id="validation-message" class="validation-message" role="alert" tabindex="-1" hidden></p>
+      <div id="answer-feedback" class="feedback" tabindex="-1" hidden></div>
+      <div class="quiz-actions">
+        <button type="button" id="btn-prev" class="secondary">Previous question</button>
+        <button type="button" id="btn-check">Check answer</button>
+        <button type="button" id="btn-next">Next question</button>
+        <button type="button" id="btn-finish">View results</button>
+      </div>
+    </section>
+
+    <section id="view-results" class="view view-results" hidden aria-labelledby="results-heading">
+      <h2 id="results-heading" tabindex="-1">Results</h2>
+      <div id="results-summary" class="results-summary"></div>
+      <p class="results-reminder">This score is practice feedback only. Study the complete lesson; do not rely only on this mock examination.</p>
+      <div class="results-actions">
+        <button type="button" id="btn-print" class="secondary">Print or save results</button>
+        <button type="button" id="btn-retake">Retake same difficulty</button>
+        <button type="button" id="btn-choose" class="secondary">Choose another difficulty</button>
+      </div>
+      <section class="results-topics" aria-labelledby="topics-heading">
+        <h3 id="topics-heading">Topic analysis</h3>
+        <div class="table-wrap">
+          <table id="results-categories">
+            <caption>Correct answers by primary topic. A topic is a strength at 75% or higher and a gap below 75%.</caption>
+            <thead>
+              <tr><th scope="col">Topic</th><th scope="col">Correct</th><th scope="col">Result</th></tr>
+            </thead>
+            <tbody id="results-categories-body"></tbody>
+          </table>
+        </div>
+        <h4>Strengths</h4>
+        <ul id="results-strengths" class="results-strengths"></ul>
+        <h4>Gaps to review in the lesson</h4>
+        <ul id="results-gaps" class="results-gaps"></ul>
+      </section>
+      <section class="results-review" aria-labelledby="review-heading">
+        <h3 id="review-heading">Full answer review</h3>
+        <ol id="results-review" class="review-list"></ol>
+      </section>
+    </section>
+
+    <section id="view-unavailable" class="view view-unavailable" hidden aria-labelledby="unavailable-heading">
+      <h2 id="unavailable-heading" tabindex="-1">Quiz unavailable</h2>
+      <p>The quiz is unavailable because its question data could not be loaded or did not pass validation, so no examination can start. Please try again later or inform your instructor.</p>
+    </section>
+  </main>
+
+  <script type="application/json" id="questions-easy">{{EASY_QUESTIONS}}</script>
+  <script type="application/json" id="questions-medium">{{MEDIUM_QUESTIONS}}</script>
+  <script type="application/json" id="questions-hard">{{HARD_QUESTIONS}}</script>
+  <script>
+  (function () {
+    'use strict';
+
+    var MODES = ['easy', 'medium', 'hard'];
+    var MODE_LABELS = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+    var QUESTION_COUNT = 25;
+    var LETTERS = ['A', 'B', 'C', 'D'];
+    var CATEGORY_ORDER = [
+      'ISR Fundamentals and Components',
+      'Roles and Importance of ISR',
+      'Airborne ISR Systems',
+      'Ground-Based ISR Systems',
+      'Maritime ISR Platforms',
+      'Space-Based ISR Systems',
+      'Timeliness, Accuracy, and Fusion',
+      'Coverage, Persistence, and Flexibility',
+      'Security, Interoperability, and Ethics'
+    ];
+    // A primary topic counts as a strength at or above this percentage, otherwise a gap.
+    var STRENGTH_THRESHOLD = 75;
+    // Mastery bands, checked from the top: the first band whose minimum is met applies.
+    var MASTERY_BANDS = [
+      { min: 90, name: 'Mastery', description: 'Consistent command of the lesson at this difficulty.' },
+      { min: 75, name: 'Proficient', description: 'Solid understanding. Restudy the topics listed as gaps.' },
+      { min: 60, name: 'Developing', description: 'Partial understanding. Restudy the lesson before retaking.' },
+      { min: 0, name: 'Needs review', description: 'Study the complete lesson again before another attempt.' }
+    ];
+
+    // Mirrors validateQuestion in scripts/build.mjs; the verifier checks both agree error-for-error.
+    function validateQuestion(question, expectedDifficulty, expectedId) {
+      if (question === null || typeof question !== 'object' || Array.isArray(question)) {
+        return ['question must be an object'];
+      }
+      var errors = [];
+      if (!Number.isInteger(question.id) || question.id !== expectedId) {
+        errors.push('id must be integer ' + expectedId);
+      }
+      if (question.difficulty !== expectedDifficulty) {
+        errors.push('difficulty must be ' + expectedDifficulty);
+      }
+      ['category', 'prompt', 'explanation'].forEach(function (field) {
+        if (typeof question[field] !== 'string' || !question[field].trim()) {
+          errors.push(field + ' must be a nonempty string');
+        }
+      });
+      if (!Array.isArray(question.tags) || question.tags.some(function (tag) { return typeof tag !== 'string' || !tag.trim(); })) {
+        errors.push('tags must be an array of nonempty strings');
+      }
+      if (!Array.isArray(question.options) || question.options.length !== 4 || question.options.some(function (option) { return typeof option !== 'string' || !option.trim(); })) {
+        errors.push('options must contain four nonempty strings');
+      }
+      if (!Number.isInteger(question.answer) || question.answer < 0 || question.answer > 3) {
+        errors.push('answer must be an integer from 0 to 3');
+      }
+      if (!Array.isArray(question.sourceSlides) || question.sourceSlides.length === 0 || question.sourceSlides.some(function (slide) { return !Number.isInteger(slide) || slide < 21 || slide > 58; })) {
+        errors.push('sourceSlides must contain integers from 21 to 58');
+      }
+      return errors;
+    }
+
+    function validateBanks(banks) {
+      if (banks === null || typeof banks !== 'object') {
+        return { valid: false, errors: ['question banks must be an object'] };
+      }
+      var errors = [];
+      MODES.forEach(function (mode) {
+        var bank = banks[mode];
+        if (!Array.isArray(bank)) {
+          errors.push(mode + ' bank must be an array of ' + QUESTION_COUNT + ' questions');
+          return;
+        }
+        if (bank.length !== QUESTION_COUNT) {
+          errors.push(mode + ' bank must contain exactly ' + QUESTION_COUNT + ' questions (found ' + bank.length + ')');
+        }
+        bank.forEach(function (question, index) {
+          validateQuestion(question, mode, index + 1).forEach(function (error) {
+            errors.push(mode + ' question ' + (index + 1) + ': ' + error);
+          });
+        });
+      });
+      return { valid: errors.length === 0, errors: errors };
+    }
+
+    // Fisher-Yates shuffle of a copy; the source array is never mutated.
+    function shuffleQuestions(bank, random) {
+      if (typeof random !== 'function') random = Math.random;
+      var copy = Array.prototype.slice.call(bank);
+      for (var i = copy.length - 1; i > 0; i--) {
+        var j = Math.min(i, Math.max(0, Math.floor(random() * (i + 1))));
+        var held = copy[i];
+        copy[i] = copy[j];
+        copy[j] = held;
+      }
+      return copy;
+    }
+
+    function createAttempt(mode, banks, random) {
+      if (MODES.indexOf(mode) === -1) throw new Error('Unknown difficulty: ' + mode);
+      var questions = shuffleQuestions(banks[mode], random);
+      return {
+        mode: mode,
+        questions: questions,
+        current: 0,
+        responses: questions.map(function () { return { selected: null, checked: false }; })
+      };
+    }
+
+    function masteryBand(percentage) {
+      for (var i = 0; i < MASTERY_BANDS.length; i++) {
+        if (percentage >= MASTERY_BANDS[i].min) return MASTERY_BANDS[i];
+      }
+      return MASTERY_BANDS[MASTERY_BANDS.length - 1];
+    }
+
+    function computeResults(attempt) {
+      var byCategory = {};
+      var order = CATEGORY_ORDER.slice();
+      var score = 0;
+      var review = attempt.questions.map(function (question, index) {
+        var response = attempt.responses[index];
+        var correct = response.selected === question.answer;
+        if (correct) score++;
+        if (!byCategory[question.category]) {
+          byCategory[question.category] = { category: question.category, correct: 0, total: 0 };
+          if (order.indexOf(question.category) === -1) order.push(question.category);
+        }
+        byCategory[question.category].total++;
+        if (correct) byCategory[question.category].correct++;
+        return { number: index + 1, question: question, selected: response.selected, correct: correct };
+      });
+      var total = attempt.questions.length;
+      var percentage = total ? Math.round((score / total) * 100) : 0;
+      var categories = order.filter(function (name) { return byCategory[name]; }).map(function (name) {
+        var entry = byCategory[name];
+        entry.percentage = Math.round((entry.correct / entry.total) * 100);
+        entry.status = entry.percentage >= STRENGTH_THRESHOLD ? 'Strength' : 'Gap';
+        return entry;
+      });
+      return {
+        mode: attempt.mode,
+        score: score,
+        total: total,
+        percentage: percentage,
+        band: masteryBand(percentage),
+        categories: categories,
+        review: review
+      };
+    }
+
+    function deepFreeze(value) {
+      if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+        Object.freeze(value);
+        Object.keys(value).forEach(function (key) { deepFreeze(value[key]); });
+      }
+      return value;
+    }
+
+    // ----- State and DOM -----
+
+    var state = {
+      available: false,
+      errors: [],
+      banks: null,
+      studyConfirmed: false,
+      view: 'landing',
+      attempt: null,
+      results: null,
+      random: Math.random
+    };
+
+    function byId(id) { return document.getElementById(id); }
+
+    var ui = {
+      views: {
+        landing: byId('view-landing'),
+        quiz: byId('view-quiz'),
+        results: byId('view-results'),
+        unavailable: byId('view-unavailable')
+      },
+      studyConfirm: byId('study-confirm'),
+      modeHint: byId('mode-hint'),
+      difficultyHeading: byId('difficulty-heading'),
+      unavailableHeading: byId('unavailable-heading'),
+      modeButtons: {
+        easy: byId('mode-easy'),
+        medium: byId('mode-medium'),
+        hard: byId('mode-hard')
+      },
+      quizHeading: byId('quiz-heading'),
+      quizProgress: byId('quiz-progress'),
+      quizStatus: byId('quiz-status'),
+      questionHeading: byId('question-heading'),
+      questionCategory: byId('question-category'),
+      questionArea: byId('question-area'),
+      validation: byId('validation-message'),
+      feedback: byId('answer-feedback'),
+      btnPrev: byId('btn-prev'),
+      btnCheck: byId('btn-check'),
+      btnNext: byId('btn-next'),
+      btnFinish: byId('btn-finish'),
+      resultsHeading: byId('results-heading'),
+      resultsSummary: byId('results-summary'),
+      resultsCategories: byId('results-categories-body'),
+      resultsStrengths: byId('results-strengths'),
+      resultsGaps: byId('results-gaps'),
+      resultsReview: byId('results-review'),
+      btnPrint: byId('btn-print'),
+      btnRetake: byId('btn-retake'),
+      btnChoose: byId('btn-choose'),
+      radios: []
+    };
+
+    function make(tag, className, text) {
+      var node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    // Empties a node and appends the given nodes; avoids the Safari 14+ only children-replacement API.
+    function setChildren(node, children) {
+      node.textContent = '';
+      children.forEach(function (child) { node.appendChild(child); });
+    }
+
+    function optionText(question, index) {
+      return LETTERS[index] + '. ' + question.options[index];
+    }
+
+    function showView(name) {
+      state.view = name;
+      Object.keys(ui.views).forEach(function (key) {
+        ui.views[key].hidden = key !== name;
+      });
+      // Lets the stylesheet compact the hero outside the landing view.
+      document.body.setAttribute('data-view', name);
+    }
+
+    // Difficulty accent for the page: theme-easy, theme-medium or theme-hard; null clears it.
+    function setTheme(mode) {
+      MODES.forEach(function (key) {
+        document.body.classList.toggle('theme-' + key, key === mode);
+      });
+    }
+
+    function hideValidation() {
+      ui.validation.textContent = '';
+      ui.validation.hidden = true;
+    }
+
+    function showValidation(message) {
+      ui.validation.textContent = message;
+      ui.validation.hidden = false;
+      ui.validation.focus();
+    }
+
+    function checkedCount(attempt) {
+      return attempt.responses.filter(function (response) { return response.checked; }).length;
+    }
+
+    function firstUncheckedIndex(attempt) {
+      for (var i = 0; i < attempt.responses.length; i++) {
+        if (!attempt.responses[i].checked) return i;
+      }
+      return -1;
+    }
+
+    // ----- Study gate -----
+
+    function setStudyConfirmed(confirmed) {
+      state.studyConfirmed = Boolean(confirmed) && state.available;
+      ui.studyConfirm.checked = state.studyConfirmed;
+      MODES.forEach(function (mode) {
+        ui.modeButtons[mode].disabled = !state.studyConfirmed;
+      });
+      if (state.available) {
+        ui.modeHint.textContent = state.studyConfirmed
+          ? 'Difficulty buttons enabled. Choose Easy, Medium, or Hard to begin.'
+          : 'Check the study confirmation above to enable the difficulty buttons.';
+      }
+      return state.studyConfirmed;
+    }
+
+    // ----- Quiz flow -----
+
+    function startQuiz(mode) {
+      if (!state.available || !state.studyConfirmed || MODES.indexOf(mode) === -1) return false;
+      state.attempt = createAttempt(mode, state.banks, state.random);
+      state.results = null;
+      setTheme(mode);
+      showView('quiz');
+      renderQuestion();
+      ui.questionHeading.focus();
+      return true;
+    }
+
+    function renderQuestion() {
+      var attempt = state.attempt;
+      var index = attempt.current;
+      var question = attempt.questions[index];
+      var response = attempt.responses[index];
+      var done = checkedCount(attempt);
+      var total = attempt.questions.length;
+
+      ui.quizHeading.textContent = MODE_LABELS[attempt.mode] + ' examination';
+      ui.quizProgress.setAttribute('max', String(total));
+      ui.quizProgress.setAttribute('value', String(done));
+      ui.quizStatus.textContent = 'Question ' + (index + 1) + ' of ' + total + '. ' + done + ' of ' + total + ' answers checked.';
+      ui.questionHeading.textContent = 'Question ' + (index + 1) + ' of ' + total;
+      ui.questionCategory.textContent = 'Topic: ' + question.category;
+
+      var fieldset = make('fieldset', 'question-fieldset');
+      fieldset.id = 'question-fieldset';
+      var legend = make('legend', 'question-prompt', question.prompt);
+      legend.id = 'question-prompt';
+      fieldset.appendChild(legend);
+      ui.radios = question.options.map(function (option, optionIndex) {
+        var inputId = 'answer-option-' + optionIndex;
+        var label = make('label', 'option');
+        label.htmlFor = inputId;
+        var input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'answer';
+        input.id = inputId;
+        input.value = String(optionIndex);
+        input.checked = response.selected === optionIndex;
+        input.disabled = response.checked;
+        input.addEventListener('change', function () { selectAnswer(optionIndex); });
+        var body = make('span', 'option-body');
+        body.append(make('span', 'option-letter', LETTERS[optionIndex] + '.'), ' ', make('span', 'option-text', option));
+        if (response.checked && optionIndex === question.answer) {
+          label.classList.add('option-correct');
+          body.appendChild(make('span', 'option-tag', 'Correct answer'));
+        } else if (response.checked && optionIndex === response.selected) {
+          label.classList.add('option-incorrect');
+          body.appendChild(make('span', 'option-tag', 'Your answer'));
+        }
+        label.append(input, body);
+        fieldset.appendChild(label);
+        return input;
+      });
+      setChildren(ui.questionArea, [fieldset]);
+
+      hideValidation();
+      renderFeedback(question, response);
+
+      var allChecked = done === total;
+      ui.btnPrev.hidden = index === 0;
+      ui.btnCheck.hidden = response.checked;
+      ui.btnNext.hidden = !response.checked || index === total - 1;
+      ui.btnFinish.hidden = !allChecked;
+    }
+
+    function renderFeedback(question, response) {
+      if (!response.checked) {
+        ui.feedback.className = 'feedback';
+        setChildren(ui.feedback, []);
+        ui.feedback.hidden = true;
+        return;
+      }
+      var correct = response.selected === question.answer;
+      ui.feedback.className = 'feedback ' + (correct ? 'feedback-correct' : 'feedback-incorrect');
+      var verdict = make('p', 'feedback-verdict');
+      verdict.appendChild(make('strong', null, correct ? 'Correct.' : 'Incorrect.'));
+      var parts = [verdict];
+      if (!correct) parts.push(make('p', 'feedback-selected', 'Your answer: ' + optionText(question, response.selected)));
+      parts.push(
+        make('p', 'feedback-answer', 'Correct answer: ' + optionText(question, question.answer)),
+        make('p', 'feedback-explanation', 'Explanation: ' + question.explanation),
+        make('p', 'feedback-source', 'Lesson reference: slide ' + question.sourceSlides.join(', '))
+      );
+      setChildren(ui.feedback, parts);
+      ui.feedback.hidden = false;
+    }
+
+    function selectAnswer(index) {
+      var attempt = state.attempt;
+      if (state.view !== 'quiz' || !attempt) return false;
+      var response = attempt.responses[attempt.current];
+      if (response.checked || !Number.isInteger(index) || index < 0 || index > 3) {
+        ui.radios.forEach(function (radio, radioIndex) { radio.checked = response.selected === radioIndex; });
+        return false;
+      }
+      response.selected = index;
+      ui.radios.forEach(function (radio, radioIndex) { radio.checked = radioIndex === index; });
+      hideValidation();
+      return true;
+    }
+
+    function checkAnswer() {
+      var attempt = state.attempt;
+      if (state.view !== 'quiz' || !attempt) return false;
+      var response = attempt.responses[attempt.current];
+      if (response.checked) return false;
+      if (response.selected === null) {
+        showValidation('Select an answer before pressing Check answer.');
+        return false;
+      }
+      response.checked = true;
+      renderQuestion();
+      ui.feedback.focus();
+      return true;
+    }
+
+    function goToQuestion(index) {
+      var attempt = state.attempt;
+      if (state.view !== 'quiz' || !attempt || !Number.isInteger(index)) return false;
+      if (index < 0 || index >= attempt.questions.length) return false;
+      var limit = firstUncheckedIndex(attempt);
+      if (limit !== -1 && index > limit) return false;
+      attempt.current = index;
+      renderQuestion();
+      ui.questionHeading.focus();
+      return true;
+    }
+
+    function finishQuiz() {
+      var attempt = state.attempt;
+      if (state.view !== 'quiz' || !attempt) return false;
+      if (firstUncheckedIndex(attempt) !== -1) {
+        showValidation('Check all ' + attempt.questions.length + ' answers before viewing results.');
+        return false;
+      }
+      state.results = computeResults(attempt);
+      renderResults(state.results);
+      showView('results');
+      ui.resultsHeading.focus();
+      return true;
+    }
+
+    function retakeQuiz() {
+      var mode = state.attempt ? state.attempt.mode : null;
+      if (!mode) return false;
+      return startQuiz(mode);
+    }
+
+    function resetToDifficulty() {
+      if (!state.available) return false;
+      state.attempt = null;
+      state.results = null;
+      setTheme(null);
+      showView('landing');
+      setStudyConfirmed(state.studyConfirmed);
+      ui.difficultyHeading.focus();
+      return true;
+    }
+
+    // ----- Results -----
+
+    function renderResults(results) {
+      ui.resultsHeading.textContent = MODE_LABELS[results.mode] + ' examination results';
+
+      var score = make('p', 'results-score');
+      score.append(make('strong', null, 'Score: '), results.score + ' of ' + results.total + ' correct (' + results.percentage + '%)');
+      var band = make('p', 'results-band');
+      band.append(make('strong', null, 'Mastery band: '), results.band.name + '. ' + results.band.description);
+      setChildren(ui.resultsSummary, [score, band]);
+
+      var rows = results.categories.map(function (entry) {
+        var row = document.createElement('tr');
+        var name = make('th', null, entry.category);
+        name.setAttribute('scope', 'row');
+        row.append(name, make('td', null, entry.correct + ' of ' + entry.total + ' (' + entry.percentage + '%)'), make('td', null, entry.status));
+        return row;
+      });
+      setChildren(ui.resultsCategories, rows);
+
+      renderTopicList(ui.resultsStrengths, results.categories.filter(function (entry) { return entry.status === 'Strength'; }), 'No topic reached 75% in this attempt.');
+      renderTopicList(ui.resultsGaps, results.categories.filter(function (entry) { return entry.status === 'Gap'; }), 'No gaps in this attempt. Keep studying the complete lesson.');
+
+      var items = results.review.map(function (entry) {
+        var question = entry.question;
+        var item = make('li', 'review-item ' + (entry.correct ? 'review-correct' : 'review-incorrect'));
+        item.append(
+          make('h4', null, 'Question ' + entry.number + ': ' + (entry.correct ? 'Correct' : 'Incorrect')),
+          make('p', 'review-topic', 'Topic: ' + question.category),
+          make('p', 'review-prompt', question.prompt),
+          make('p', 'review-selected', 'Your answer: ' + optionText(question, entry.selected)),
+          make('p', 'review-answer', 'Correct answer: ' + optionText(question, question.answer)),
+          make('p', 'review-explanation', 'Explanation: ' + question.explanation),
+          make('p', 'review-source', 'Lesson reference: slide ' + question.sourceSlides.join(', '))
+        );
+        return item;
+      });
+      setChildren(ui.resultsReview, items);
+    }
+
+    function renderTopicList(list, entries, emptyText) {
+      if (!entries.length) {
+        setChildren(list, [make('li', 'topic-empty', emptyText)]);
+        return;
+      }
+      setChildren(list, entries.map(function (entry) {
+        return make('li', null, entry.category + ': ' + entry.correct + ' of ' + entry.total + ' correct');
+      }));
+    }
+
+    // ----- Startup -----
+
+    function readBanks() {
+      var banks = {};
+      var errors = [];
+      MODES.forEach(function (mode) {
+        var element = byId('questions-' + mode);
+        if (!element) {
+          errors.push(mode + ' bank data is missing');
+          return;
+        }
+        try {
+          banks[mode] = JSON.parse(element.textContent);
+        } catch (error) {
+          errors.push(mode + ' bank data is not valid JSON');
+        }
+      });
+      return { banks: banks, errors: errors };
+    }
+
+    function init() {
+      var loaded = readBanks();
+      var validation = validateBanks(loaded.banks);
+      state.errors = loaded.errors.concat(validation.errors);
+      state.available = state.errors.length === 0;
+
+      if (!state.available) {
+        state.banks = null;
+        ui.studyConfirm.checked = false;
+        ui.studyConfirm.disabled = true;
+        MODES.forEach(function (mode) { ui.modeButtons[mode].disabled = true; });
+        showView('unavailable');
+        ui.unavailableHeading.focus();
+        console.error('ISR Operations Mastery Quiz is unavailable: ' + state.errors.join('; '));
+        return;
+      }
+
+      state.banks = deepFreeze(loaded.banks);
+      ui.studyConfirm.addEventListener('change', function () { setStudyConfirmed(ui.studyConfirm.checked); });
+      MODES.forEach(function (mode) {
+        ui.modeButtons[mode].addEventListener('click', function () { startQuiz(mode); });
+      });
+      ui.btnCheck.addEventListener('click', checkAnswer);
+      ui.btnPrev.addEventListener('click', function () { if (state.attempt) goToQuestion(state.attempt.current - 1); });
+      ui.btnNext.addEventListener('click', function () { if (state.attempt) goToQuestion(state.attempt.current + 1); });
+      ui.btnFinish.addEventListener('click', finishQuiz);
+      ui.btnPrint.addEventListener('click', function () { window.print(); });
+      ui.btnRetake.addEventListener('click', retakeQuiz);
+      ui.btnChoose.addEventListener('click', resetToDifficulty);
+
+      showView('landing');
+      setStudyConfirmed(false);
+    }
+
+    function getState() {
+      return JSON.parse(JSON.stringify({
+        available: state.available,
+        errors: state.errors,
+        studyConfirmed: state.studyConfirmed,
+        view: state.view,
+        attempt: state.attempt,
+        results: state.results
+      }));
+    }
+
+    init();
+
+    globalThis.__artilleryQuiz = Object.freeze({
+      validateBanks: validateBanks,
+      shuffleQuestions: shuffleQuestions,
+      createAttempt: createAttempt,
+      computeResults: computeResults,
+      masteryBand: masteryBand,
+      setStudyConfirmed: setStudyConfirmed,
+      startQuiz: startQuiz,
+      selectAnswer: selectAnswer,
+      checkAnswer: checkAnswer,
+      goToQuestion: goToQuestion,
+      finishQuiz: finishQuiz,
+      retakeQuiz: retakeQuiz,
+      resetToDifficulty: resetToDifficulty,
+      getState: getState,
+      getBanks: function () { return state.banks; },
+      setRandom: function (random) { state.random = typeof random === 'function' ? random : Math.random; }
+    });
+  })();
+  </script>
+</body>
+</html>

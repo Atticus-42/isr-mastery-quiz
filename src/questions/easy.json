@@ -1,0 +1,506 @@
+[
+  {
+    "id": 1,
+    "difficulty": "easy",
+    "category": "ISR Fundamentals and Components",
+    "tags": [
+      "surveillance"
+    ],
+    "prompt": "A Philippine Army company posts a team to watch one bridge without interruption and log every crossing. Which ISR component is this activity?",
+    "options": [
+      "Surveillance",
+      "Reconnaissance",
+      "Intelligence",
+      "Dissemination"
+    ],
+    "answer": 0,
+    "explanation": "Slide 26 defines surveillance as the continuous observation of a target.",
+    "sourceSlides": [
+      26
+    ]
+  },
+  {
+    "id": 2,
+    "difficulty": "easy",
+    "category": "ISR Fundamentals and Components",
+    "tags": [
+      "reconnaissance"
+    ],
+    "prompt": "A patrol is sent to collect data that answers one specific commander question: can trucks use a jungle road? Which ISR component does this describe?",
+    "options": [
+      "Reconnaissance",
+      "Surveillance",
+      "Intelligence",
+      "Persistence"
+    ],
+    "answer": 0,
+    "explanation": "Slide 26 defines reconnaissance as collecting data to address a specific military question.",
+    "sourceSlides": [
+      26
+    ]
+  },
+  {
+    "id": 3,
+    "difficulty": "easy",
+    "category": "ISR Fundamentals and Components",
+    "tags": [
+      "intelligence"
+    ],
+    "prompt": "A battalion staff builds a product by combining the results of surveillance and reconnaissance with other data. What does the lesson call this product?",
+    "options": [
+      "Intelligence",
+      "Surveillance",
+      "Reconnaissance",
+      "A collection plan"
+    ],
+    "answer": 0,
+    "explanation": "Slide 26 defines intelligence as the result of surveillance and reconnaissance combined with other data.",
+    "sourceSlides": [
+      26
+    ]
+  },
+  {
+    "id": 4,
+    "difficulty": "easy",
+    "category": "Roles and Importance of ISR",
+    "tags": [
+      "role of ISR",
+      "decision-making"
+    ],
+    "prompt": "A brigade commander asks why the unit invests in ISR. Which purpose does the lesson state?",
+    "options": [
+      "To replace the commander's planning with automated orders",
+      "To limit intelligence to areas held by friendly forces",
+      "To avoid assessing combat effectiveness after operations",
+      "To give commanders information that aids decision-making"
+    ],
+    "answer": 3,
+    "explanation": "Slide 28 says ISR aims to provide information to commanders to aid decision-making.",
+    "sourceSlides": [
+      28
+    ]
+  },
+  {
+    "id": 5,
+    "difficulty": "easy",
+    "category": "Roles and Importance of ISR",
+    "tags": [
+      "evaluate combat effectiveness"
+    ],
+    "prompt": "After a training strike, the staff uses ISR to judge how well the strike worked. Which stated ISR aim is being served?",
+    "options": [
+      "Evaluating combat effectiveness",
+      "Supporting deception techniques",
+      "Alerting friendly forces to threats",
+      "Defining the operational environment"
+    ],
+    "answer": 0,
+    "explanation": "Slide 28 lists evaluating combat effectiveness as an ISR aim.",
+    "sourceSlides": [
+      28
+    ]
+  },
+  {
+    "id": 6,
+    "difficulty": "easy",
+    "category": "Roles and Importance of ISR",
+    "tags": [
+      "ISR systems",
+      "unstructured data"
+    ],
+    "prompt": "A student says ISR systems are limited to large satellites. Which statement from the lesson corrects this?",
+    "options": [
+      "ISR systems are limited to manned aircraft crews",
+      "ISR systems range in size from mobile devices to satellites",
+      "ISR systems can process structured records only",
+      "ISR systems are useful only in the air domain"
+    ],
+    "answer": 1,
+    "explanation": "Slide 29 says ISR systems range from mobile devices to satellites and use unstructured data to extract insights.",
+    "sourceSlides": [
+      29
+    ]
+  },
+  {
+    "id": 7,
+    "difficulty": "easy",
+    "category": "Airborne ISR Systems",
+    "tags": [
+      "HALE"
+    ],
+    "prompt": "A planner wants a platform that can operate extremely high for many hours because no pilot limits it. Which platform fits?",
+    "options": [
+      "A manned reconnaissance aircraft",
+      "A ground surveillance radar",
+      "A submarine",
+      "A high-altitude, long-endurance (HALE) vehicle"
+    ],
+    "answer": 3,
+    "explanation": "Slide 36 says a HALE vehicle can operate extremely high for many hours since the pilot has no limitations.",
+    "sourceSlides": [
+      36
+    ]
+  },
+  {
+    "id": 8,
+    "difficulty": "easy",
+    "category": "Airborne ISR Systems",
+    "tags": [
+      "UAV",
+      "strike capability"
+    ],
+    "prompt": "Staff ask what capability UAVs offer when they carry payloads such as missiles or precision-guided ammunition. Which is stated?",
+    "options": [
+      "Signals collection from a regular orbit",
+      "A flexible and persistent strike capability supporting ground or maritime operations",
+      "Concealed collection beneath the sea",
+      "Fixed observation from a low tower"
+    ],
+    "answer": 1,
+    "explanation": "Slide 32 describes flexible, persistent strike capability against targets identified through ISR missions.",
+    "sourceSlides": [
+      32
+    ]
+  },
+  {
+    "id": 9,
+    "difficulty": "easy",
+    "category": "Airborne ISR Systems",
+    "tags": [
+      "manned reconnaissance aircraft"
+    ],
+    "prompt": "A trainee calls manned reconnaissance aircraft a brand-new approach. What does the lesson say?",
+    "options": [
+      "It is the newest approach, developed after HALE vehicles",
+      "It is the traditional aerial approach, used since World War I",
+      "It began with satellites and was later adapted to aircraft",
+      "It is limited to maritime missions"
+    ],
+    "answer": 1,
+    "explanation": "Slide 35 calls manned aircraft the more traditional approach, used since World War I.",
+    "sourceSlides": [
+      35
+    ]
+  },
+  {
+    "id": 10,
+    "difficulty": "easy",
+    "category": "Ground-Based ISR Systems",
+    "tags": [
+      "ground surveillance radar"
+    ],
+    "prompt": "A post needs a radar it can move with a vehicle. Which lesson statement supports this?",
+    "options": [
+      "Ground surveillance radars are used only from satellite ground stations",
+      "Ground surveillance radars are carried only by aircraft",
+      "Ground surveillance radars operate only aboard surface ships",
+      "Ground surveillance radars can be fixed on a low tower or vehicle-mounted as mobile units"
+    ],
+    "answer": 3,
+    "explanation": "Slide 37 says ground surveillance radars may be fixed, usually on a low tower, or mounted on a vehicle.",
+    "sourceSlides": [
+      37
+    ]
+  },
+  {
+    "id": 11,
+    "difficulty": "easy",
+    "category": "Ground-Based ISR Systems",
+    "tags": [
+      "sensor networks"
+    ],
+    "prompt": "Which ground ISR resource has long been dropped behind enemy lines by Allied forces?",
+    "options": [
+      "High-altitude, long-endurance vehicles",
+      "Commercial imagery products",
+      "Submarine sensors",
+      "Fixed and mobile sensor networks"
+    ],
+    "answer": 3,
+    "explanation": "Slide 38 says sensor networks are nothing new; sensors have been dropped behind enemy lines for decades.",
+    "sourceSlides": [
+      38
+    ]
+  },
+  {
+    "id": 12,
+    "difficulty": "easy",
+    "category": "Maritime ISR Platforms",
+    "tags": [
+      "surface fleet"
+    ],
+    "prompt": "In a naval planning class, which force is described as the backbone of the Navy for maritime ISR?",
+    "options": [
+      "The surface warfare fleet",
+      "The aviation branches",
+      "The submarine force",
+      "Space-based sensors"
+    ],
+    "answer": 0,
+    "explanation": "Slide 39 says the backbone of the Navy is its surface warfare fleet.",
+    "sourceSlides": [
+      39
+    ]
+  },
+  {
+    "id": 13,
+    "difficulty": "easy",
+    "category": "Maritime ISR Platforms",
+    "tags": [
+      "submarine"
+    ],
+    "prompt": "Which maritime asset does the lesson call the most invisible asset in the entire military?",
+    "options": [
+      "The surface ship",
+      "The submarine",
+      "The ground surveillance radar",
+      "The HALE vehicle"
+    ],
+    "answer": 1,
+    "explanation": "Slide 40 says submarines are the most invisible asset, giving them an incredible ability to gather information.",
+    "sourceSlides": [
+      40
+    ]
+  },
+  {
+    "id": 14,
+    "difficulty": "easy",
+    "category": "Space-Based ISR Systems",
+    "tags": [
+      "IMINT",
+      "satellite orbit"
+    ],
+    "prompt": "A commander relies on satellite imagery alone. Which weakness does the lesson warn about?",
+    "options": [
+      "Satellite imagery is always blurred over the target",
+      "Satellites cannot observe large areas",
+      "Targets can track regular orbit cycles and avoid being seen",
+      "Satellite imagery is blocked out over friendly territory"
+    ],
+    "answer": 2,
+    "explanation": "Slide 41 says satellites are in regular orbits, so targets can track the cycles and avoid being seen.",
+    "sourceSlides": [
+      41
+    ]
+  },
+  {
+    "id": 15,
+    "difficulty": "easy",
+    "category": "Space-Based ISR Systems",
+    "tags": [
+      "MASINT"
+    ],
+    "prompt": "Which space-based discipline identifies distinctive target characteristics such as source, sender, or emitter type and location?",
+    "options": [
+      "IMINT",
+      "SIGINT",
+      "MASINT",
+      "HUMINT"
+    ],
+    "answer": 2,
+    "explanation": "Slide 43 says MASINT identifies distinctive characteristics such as source, sender or emitter type and location.",
+    "sourceSlides": [
+      43
+    ]
+  },
+  {
+    "id": 16,
+    "difficulty": "easy",
+    "category": "Space-Based ISR Systems",
+    "tags": [
+      "commercial imagery"
+    ],
+    "prompt": "A multinational partner needs imagery. Which advantage of commercial imagery does the lesson state?",
+    "options": [
+      "It is classified and restricted to national users",
+      "It comes only from government satellites",
+      "It is unclassified and benefits multinational partners",
+      "It cannot be disseminated to partners"
+    ],
+    "answer": 2,
+    "explanation": "Slide 45 says commercial imagery products are unclassified and benefit multinational partners.",
+    "sourceSlides": [
+      45
+    ]
+  },
+  {
+    "id": 17,
+    "difficulty": "easy",
+    "category": "Timeliness, Accuracy, and Fusion",
+    "tags": [
+      "timeliness"
+    ],
+    "prompt": "A report reaches the commander after the enemy has already moved. Which ISR principle was not met?",
+    "options": [
+      "Fusion",
+      "Coverage",
+      "Timeliness",
+      "Security"
+    ],
+    "answer": 2,
+    "explanation": "Slide 49 says ISR prioritizes timely collection, processing and dissemination.",
+    "sourceSlides": [
+      49
+    ]
+  },
+  {
+    "id": 18,
+    "difficulty": "easy",
+    "category": "Timeliness, Accuracy, and Fusion",
+    "tags": [
+      "accuracy"
+    ],
+    "prompt": "A report misidentifies a unit and leads to a wrong decision. Which principle was not met?",
+    "options": [
+      "Accuracy",
+      "Persistence",
+      "Flexibility",
+      "Interoperability"
+    ],
+    "answer": 0,
+    "explanation": "Slide 50 says accuracy ensures reliable information and minimizes errors and misinterpretations.",
+    "sourceSlides": [
+      50
+    ]
+  },
+  {
+    "id": 19,
+    "difficulty": "easy",
+    "category": "Timeliness, Accuracy, and Fusion",
+    "tags": [
+      "fusion"
+    ],
+    "prompt": "An analyst combines SIGINT, HUMINT and IMINT into one assessment. Which principle is applied?",
+    "options": [
+      "Coverage",
+      "Persistence",
+      "Security",
+      "Fusion"
+    ],
+    "answer": 3,
+    "explanation": "Slide 51 describes fusion as using multiple sources such as SIGINT, HUMINT and IMINT.",
+    "sourceSlides": [
+      51
+    ]
+  },
+  {
+    "id": 20,
+    "difficulty": "easy",
+    "category": "Coverage, Persistence, and Flexibility",
+    "tags": [
+      "coverage"
+    ],
+    "prompt": "A collection plan leaves one part of the area of interest unwatched. Which principle is not met?",
+    "options": [
+      "Timeliness",
+      "Coverage",
+      "Security",
+      "Fusion"
+    ],
+    "answer": 1,
+    "explanation": "Slide 52 says effective ISR strives for comprehensive coverage of the area of interest.",
+    "sourceSlides": [
+      52
+    ]
+  },
+  {
+    "id": 21,
+    "difficulty": "easy",
+    "category": "Coverage, Persistence, and Flexibility",
+    "tags": [
+      "persistence"
+    ],
+    "prompt": "A team keeps watching an area for days to detect changes and movements. Which principle does this show?",
+    "options": [
+      "Flexibility",
+      "Coverage",
+      "Accuracy",
+      "Persistence"
+    ],
+    "answer": 3,
+    "explanation": "Slide 53 defines persistence as sustained, continuous monitoring over time.",
+    "sourceSlides": [
+      53
+    ]
+  },
+  {
+    "id": 22,
+    "difficulty": "easy",
+    "category": "Coverage, Persistence, and Flexibility",
+    "tags": [
+      "flexibility"
+    ],
+    "prompt": "The enemy changes routes and the S2 redirects assets and adjusts collection priorities. Which principle is applied?",
+    "options": [
+      "Persistence",
+      "Interoperability",
+      "Flexibility",
+      "Security"
+    ],
+    "answer": 2,
+    "explanation": "Slide 54 says ISR must adapt by redirecting assets and adjusting collection priorities.",
+    "sourceSlides": [
+      54
+    ]
+  },
+  {
+    "id": 23,
+    "difficulty": "easy",
+    "category": "Security, Interoperability, and Ethics",
+    "tags": [
+      "security"
+    ],
+    "prompt": "A unit protects sensitive ISR information and assets against compromise by adversaries. Which principle is this?",
+    "options": [
+      "Interoperability",
+      "Ethical considerations",
+      "Security",
+      "Accuracy"
+    ],
+    "answer": 2,
+    "explanation": "Slide 55 says ISR involves sensitive information and assets needing strict security measures.",
+    "sourceSlides": [
+      55
+    ]
+  },
+  {
+    "id": 24,
+    "difficulty": "easy",
+    "category": "Security, Interoperability, and Ethics",
+    "tags": [
+      "interoperability"
+    ],
+    "prompt": "Army and allied ISR assets must coordinate in a coalition operation. Which principle applies?",
+    "options": [
+      "Fusion",
+      "Interoperability",
+      "Security",
+      "Coverage"
+    ],
+    "answer": 1,
+    "explanation": "Slide 56 says coordination and interoperability among services and allied forces are essential.",
+    "sourceSlides": [
+      56
+    ]
+  },
+  {
+    "id": 25,
+    "difficulty": "easy",
+    "category": "Security, Interoperability, and Ethics",
+    "tags": [
+      "ethical considerations"
+    ],
+    "prompt": "A team must collect within international law, rules of engagement and moral principles. Which principle governs this?",
+    "options": [
+      "Ethical considerations",
+      "Security",
+      "Accuracy",
+      "Flexibility"
+    ],
+    "answer": 0,
+    "explanation": "Slide 57 says ethics guide collection, analysis and dissemination under law, rules of engagement and moral principles.",
+    "sourceSlides": [
+      57
+    ]
+  }
+]

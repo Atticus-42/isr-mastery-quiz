@@ -1,0 +1,1058 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ISR Operations Mastery Quiz</title>
+  <style>
+    /* ISR palette. Every text pair is WCAG AA (see Task 6 report). */
+    :root {
+      --color-bg: #e7e8d6;
+      --color-surface: #fbfaf3;
+      --color-text: #1d2119;
+      --color-muted: #464c3c;
+      --color-border: #7a8068;
+      --color-accent: #3f4d22;
+      --color-accent-hover: #2f3a19;
+      --color-accent-text: #ffffff;
+      --color-charcoal: #23281e;
+      --color-olive-deep: #34402a;
+      --color-terrain: #5b6b3a;
+      --color-brass: #e3b65a;
+      --color-hero-text: #f3efdf;
+      --color-hero-muted: #d6d2bf;
+      --color-warning-bg: #fff0c7;
+      --color-warning-border: #9a5a00;
+      --color-warning-text: #7a3e00;
+      --color-correct: #1c6530;
+      --color-incorrect: #9e2418;
+      --color-focus: #1a4fd1;
+      --mode-accent: var(--color-accent);
+      --mode-tint: var(--color-surface);
+      --mode-glow: var(--color-brass);
+    }
+    /* Difficulty identities. The difficulty is always also named in text. */
+    .theme-easy, .mode-easy { --mode-accent: #2d6a2f; --mode-tint: #eef1e3; --mode-glow: #8fd17a; }
+    .theme-medium, .mode-medium { --mode-accent: #8a5700; --mode-tint: #f7eed6; --mode-glow: #f2b441; }
+    .theme-hard, .mode-hard { --mode-accent: #a63d17; --mode-tint: #f8e6dc; --mode-glow: #ff8a5c; }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    h1, h2, h3, h4 { line-height: 1.25; }
+
+    /* Decorative tactical-map layer: fixed, clipped and inert, so it never adds page width. */
+    .terrain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .terrain svg { display: block; width: 100%; height: 100%; }
+
+    /* Fire-mission hero */
+    .hero {
+      background: linear-gradient(135deg, var(--color-charcoal) 0%, var(--color-olive-deep) 100%);
+      color: var(--color-hero-text);
+      border-bottom: 6px solid var(--mode-glow);
+      overflow: hidden;
+    }
+    .hero-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+      gap: 1.5rem;
+      align-items: center;
+      width: 100%;
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+    }
+    .hero-copy { min-width: 0; }
+    .eyebrow { margin: 0; font-weight: 700; letter-spacing: 0.04em; color: var(--color-brass); }
+    h1 { margin: 0.25rem 0 0.5rem; font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem); }
+    .hero-lede { margin: 0; color: var(--color-hero-muted); max-width: 34rem; }
+    .hero-art { min-width: 0; }
+    .hero-art svg { display: block; width: 100%; max-width: 100%; height: auto; }
+    .hero-art text { font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; }
+    body[data-view="quiz"] .hero-inner, body[data-view="results"] .hero-inner { padding-top: 1rem; padding-bottom: 1rem; }
+    body[data-view="quiz"] .hero-art svg, body[data-view="results"] .hero-art svg { max-height: 12rem; }
+
+    /* Artwork parts. Rest states are the static artwork shown with reduced motion. */
+    #target-grid { color: var(--mode-glow); }
+    #muzzle-flash { opacity: 0; transform-box: fill-box; transform-origin: 0% 50%; }
+    #projectile { opacity: 0; transform: translate(230px, 125px); }
+    #smoke .smoke-puff { opacity: 0; transform-box: fill-box; transform-origin: center; }
+    #target-grid .target-pulse { opacity: 0; transform-box: fill-box; transform-origin: center; }
+
+    /* One fire mission (4 seconds) plays when the art appears; nothing loops, so no pause control is needed. */
+    #barrel { animation: recoil 4s ease-out 1 both; }
+    #muzzle-flash { animation: muzzle-flash 4s ease-out 1 both; }
+    #projectile { animation: projectile-arc 4s linear 1 both; }
+    #smoke .smoke-puff { animation: smoke-drift 4s ease-out 1 both; }
+    #smoke .smoke-puff:nth-child(2) { animation-delay: 0.12s; }
+    #smoke .smoke-puff:nth-child(3) { animation-delay: 0.24s; }
+    #target-grid .target-pulse { animation: target-pulse 4s ease-out 1 both; }
+
+    @keyframes recoil {
+      0%, 15% { transform: translateX(0); }
+      16.5% { transform: translateX(-10px); }
+      32%, 100% { transform: translateX(0); }
+    }
+    @keyframes muzzle-flash {
+      0%, 15% { opacity: 0; transform: scale(0.3); }
+      16.5% { opacity: 1; transform: scale(1); }
+      22%, 100% { opacity: 0; transform: scale(1.2); }
+    }
+    @keyframes smoke-drift {
+      0%, 16% { opacity: 0; transform: translate(0, 0) scale(0.4); }
+      21% { opacity: 0.85; transform: translate(4px, -4px) scale(0.9); }
+      70%, 100% { opacity: 0; transform: translate(30px, -34px) scale(2.2); }
+    }
+    @keyframes projectile-arc {
+      0%, 15.9% { opacity: 0; transform: translate(230px, 125px); }
+      16% { opacity: 1; transform: translate(230px, 125px); }
+      21% { transform: translate(252.3px, 89.8px); }
+      26% { transform: translate(274.5px, 66.7px); }
+      31% { transform: translate(296.8px, 55.7px); }
+      36% { transform: translate(319px, 56.8px); }
+      41% { transform: translate(341.3px, 69.9px); }
+      46% { transform: translate(363.5px, 95.2px); }
+      51% { transform: translate(385.8px, 132.5px); }
+      56% { opacity: 1; transform: translate(408px, 182px); }
+      57%, 100% { opacity: 0; transform: translate(408px, 182px); }
+    }
+    @keyframes target-pulse {
+      0%, 56% { opacity: 0; transform: scale(0.3); }
+      58% { opacity: 1; transform: scale(0.6); }
+      85%, 100% { opacity: 0; transform: scale(2.6); }
+    }
+    @keyframes view-enter {
+      from { opacity: 0; transform: translateY(0.5rem); }
+      to { opacity: 1; transform: none; }
+    }
+
+    /* Main card */
+    .app {
+      width: calc(100% - 2rem);
+      max-width: 52rem;
+      margin: 1.5rem auto 2rem;
+      padding: 1.25rem;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-top: 6px solid var(--mode-accent);
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 10px rgba(35, 40, 30, 0.18);
+    }
+    .view { animation: view-enter 0.3s ease-out both; }
+    .view > h2:first-child { margin-top: 0; }
+
+    button {
+      font: inherit;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0.625rem 1rem;
+      border: 2px solid var(--color-accent);
+      border-radius: 0.375rem;
+      background: var(--color-accent);
+      color: var(--color-accent-text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    button:hover:not(:disabled) { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
+    button.secondary { background: var(--color-surface); color: var(--color-accent); }
+    button.secondary:hover:not(:disabled) { background: #eef0e2; color: var(--color-accent-hover); }
+    button:disabled { cursor: not-allowed; opacity: 0.5; }
+    :focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+
+    .study-warning {
+      border: 2px solid var(--color-warning-border);
+      border-left-width: 8px;
+      border-radius: 0.5rem;
+      background: var(--color-warning-bg);
+      padding: 1rem;
+    }
+    .study-warning p { margin-top: 0; }
+    .study-warning strong { color: var(--color-warning-text); }
+    .study-confirm {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      min-height: 44px;
+      padding: 0.5rem 0;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .study-confirm input { flex: none; width: 1.5rem; height: 1.5rem; margin: 0.1rem 0 0; accent-color: var(--color-accent); }
+
+    .mode-list {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    }
+    .mode-button {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
+      text-align: left;
+      background: var(--mode-tint);
+      color: var(--color-text);
+      border: 2px solid var(--color-border);
+      border-left: 10px solid var(--mode-accent);
+    }
+    .mode-button:hover:not(:disabled) { background: var(--color-surface); border-color: var(--mode-accent); color: var(--color-text); }
+    .mode-name { font-size: 1.125rem; font-weight: 700; color: var(--mode-accent); }
+    .mode-desc { font-size: 0.9375rem; font-weight: 400; }
+    .privacy-note, .question-category, .results-reminder { color: var(--color-muted); }
+
+    progress { width: 100%; height: 0.75rem; accent-color: var(--mode-accent); }
+    fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+    legend { display: block; max-width: 100%; margin-bottom: 0.75rem; padding: 0; font-size: 1.125rem; font-weight: 600; white-space: normal; }
+    .option {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      min-height: 44px;
+      margin-bottom: 0.5rem;
+      padding: 0.75rem;
+      border: 2px solid var(--color-border);
+      border-radius: 0.5rem;
+      background: var(--color-surface);
+      cursor: pointer;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+    .option:hover:not(.option-correct):not(.option-incorrect) { border-color: var(--mode-accent); background: var(--mode-tint); }
+    .option input { flex: none; width: 1.25rem; height: 1.25rem; margin: 0.15rem 0 0; accent-color: var(--mode-accent); }
+    .option-body { min-width: 0; }
+    .option-letter { font-weight: 700; }
+    .option-tag { display: block; font-size: 0.875rem; font-weight: 700; }
+    .option-correct { border-color: var(--color-correct); border-width: 3px; }
+    .option-correct .option-tag { color: var(--color-correct); }
+    .option-incorrect { border-color: var(--color-incorrect); border-width: 3px; border-style: dashed; }
+    .option-incorrect .option-tag { color: var(--color-incorrect); }
+    .validation-message { color: var(--color-incorrect); font-weight: 600; }
+    .feedback { margin-top: 1rem; padding: 0.75rem 1rem; border-left: 6px solid var(--color-border); background: var(--mode-tint); animation: view-enter 0.25s ease-out both; }
+    .feedback p { margin: 0.25rem 0; }
+    .feedback-correct { border-left-color: var(--color-correct); }
+    .feedback-incorrect { border-left-color: var(--color-incorrect); }
+    .quiz-actions, .results-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+    .table-wrap { max-width: 100%; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; background: var(--color-surface); }
+    caption { text-align: left; padding-bottom: 0.5rem; }
+    th, td { padding: 0.5rem; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: top; }
+    .review-list { padding-left: 1.25rem; }
+    .review-item { margin-bottom: 1.25rem; }
+    .review-item p { margin: 0.25rem 0; }
+
+    /* Narrow screens: stack the hero and every control row. */
+    @media (max-width: 760px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 0.75rem; padding: 1rem; }
+      .hero-art svg { max-height: 13rem; margin: 0 auto; }
+      body[data-view="quiz"] .hero-art, body[data-view="results"] .hero-art, body[data-view="quiz"] .hero-lede, body[data-view="results"] .hero-lede { display: none; }
+      .app { width: calc(100% - 1rem); margin: 0.75rem auto 1.5rem; padding: 1rem; }
+      .mode-list { grid-template-columns: 1fr; }
+      .quiz-actions, .results-actions { flex-direction: column; }
+      .quiz-actions button, .results-actions button { width: 100%; }
+      th, td { padding: 0.375rem; }
+    }
+
+    /* Reduced motion: stop every animation and transition; the static artwork stays visible. */
+    @media (prefers-reduced-motion: reduce) {
+      #barrel, #muzzle-flash, #projectile, #smoke .smoke-puff, #smoke .smoke-puff:nth-child(2), #smoke .smoke-puff:nth-child(3), #target-grid .target-pulse, .view, .feedback, button, .option {
+        animation: none !important;
+        transition: none !important;
+      }
+      #muzzle-flash, #smoke .smoke-puff { opacity: 0; }
+      #projectile { opacity: 1; transform: translate(319px, 56.8px); }
+      #target-grid .target-pulse { opacity: 0.6; transform: none; }
+    }
+
+    @media print {
+      body { background: #ffffff; }
+      .terrain, .hero-art, .results-actions, .noscript { display: none !important; }
+      .hero { background: #ffffff; color: #000000; border-bottom: 2px solid #000000; }
+      .eyebrow, .hero-lede { color: #000000; }
+      .app { box-shadow: none; border: 0; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body data-view="landing">
+  <div class="terrain" aria-hidden="true">
+    <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="#5b6b3a" stroke-opacity="0.16" stroke-width="1">
+        <path d="M0 100H1200M0 200H1200M0 300H1200M0 400H1200M0 500H1200M0 600H1200M0 700H1200M100 0V800M200 0V800M300 0V800M400 0V800M500 0V800M600 0V800M700 0V800M800 0V800M900 0V800M1000 0V800M1100 0V800"/>
+      </g>
+      <g fill="none" stroke="#5b6b3a" stroke-opacity="0.3" stroke-width="1.5">
+        <path d="M200 260C260 180 400 170 460 240C520 310 470 400 380 410C280 420 150 350 200 260Z"/>
+        <path d="M250 270C290 220 390 215 425 260C460 305 430 360 370 365C300 370 220 320 250 270Z"/>
+        <path d="M300 280C330 255 380 255 395 285C410 315 380 335 350 335C310 335 285 305 300 280Z"/>
+        <path d="M800 120C900 60 1080 100 1100 200C1120 300 980 340 880 300C780 260 720 170 800 120Z"/>
+        <path d="M850 150C920 110 1040 140 1050 205C1060 270 970 290 900 265C830 240 800 180 850 150Z"/>
+        <path d="M900 180C950 160 1000 180 1005 210C1010 240 960 250 925 238C890 226 870 195 900 180Z"/>
+        <path d="M0 620C200 580 400 660 600 610C800 560 1000 640 1200 600"/>
+        <path d="M0 680C220 640 420 720 620 670C820 620 1010 700 1200 660"/>
+      </g>
+      <g fill="none" stroke="#9a5a00" stroke-opacity="0.2" stroke-width="1.5" stroke-dasharray="6 8">
+        <circle cx="1100" cy="720" r="200"/>
+        <circle cx="1100" cy="720" r="350"/>
+        <circle cx="1100" cy="720" r="500"/>
+      </g>
+    </svg>
+  </div>
+
+  <header class="site-header hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">Philippine Army · Signal School</p>
+        <h1>ISR Operations Mastery Quiz</h1>
+        <p class="hero-lede">A practice aid for the Introduction to ISR Operations lesson: 75 situational questions across Easy, Medium, and Hard.</p>
+      </div>
+      <div id="hero-art" class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 480 250" aria-hidden="true" focusable="false">
+          <path class="map-grid" d="M0 50H480M0 100H480M0 150H480M0 200H480M80 0V250M160 0V250M240 0V250M320 0V250M400 0V250" fill="none" stroke="#f3efdf" stroke-opacity="0.08" stroke-width="1"/>
+          <g class="range-rings" fill="none" stroke="#e3b65a" stroke-opacity="0.4" stroke-width="1.2" stroke-dasharray="4 6">
+            <circle cx="140" cy="200" r="110"/>
+            <circle cx="140" cy="200" r="190"/>
+            <circle cx="140" cy="200" r="270"/>
+          </g>
+          <text x="146" y="86" fill="#e3b65a" fill-opacity="0.85">RNG 40 KM</text>
+          <text x="146" y="18" fill="#e3b65a" fill-opacity="0.85">RNG 80 KM</text>
+          <text x="262" y="18" fill="#e3b65a">ISR TASKING · TEAM A</text>
+          <text x="262" y="31" fill="#d6d2bf">GRID 51P TT 3341 1276 · UAS 02</text>
+          <path class="hill" d="M0 214C60 206 110 210 170 212C240 214 300 200 360 206C410 210 450 204 480 208V250H0Z" fill="#3d4a2a"/>
+          <path d="M0 226C80 220 160 228 240 224C320 220 400 230 480 224M0 238C90 234 170 242 260 238C340 234 410 242 480 238" fill="none" stroke="#5b6b3a" stroke-width="1.5"/>
+          <text x="12" y="246" fill="#d6d2bf">SENSOR: EO/IR · LINK: OK · PED: ON</text>
+          <path class="trajectory" d="M230 125Q319 -40 408 182" fill="none" stroke="#f3efdf" stroke-opacity="0.55" stroke-width="1.5" stroke-dasharray="3 6"/>
+          <g id="target-grid" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="376" y="150" width="64" height="64"/>
+            <path d="M392 150V214M408 150V214M424 150V214M376 166H440M376 182H440M376 198H440" stroke-opacity="0.45" stroke-width="1"/>
+            <circle cx="408" cy="182" r="9"/>
+            <path d="M408 166V177M408 187V198M392 182H403M413 182H424"/>
+            <circle class="target-pulse" cx="408" cy="182" r="14" stroke-width="2.5"/>
+            <text x="376" y="143" fill="currentColor" stroke="none">OBJ AREA 1001</text>
+          </g>
+          <g id="howitzer">
+            <ellipse cx="124" cy="214" rx="82" ry="5" fill="#1b1f16" fill-opacity="0.5"/>
+            <rect x="70" y="190" width="110" height="22" rx="5" fill="#586636" stroke="#1f231b" stroke-width="2"/>
+            <rect x="82" y="176" width="40" height="16" rx="3" fill="#6b7a45" stroke="#1f231b" stroke-width="2"/>
+            <path d="M138 190V160" stroke="#1f231b" stroke-width="5" stroke-linecap="round"/>
+            <g transform="translate(138 158) rotate(-32)">
+              <g id="barrel">
+                <path d="M-30 0Q0 -30 30 0Z" fill="#a3b36d" stroke="#1f231b" stroke-width="2" stroke-linejoin="round"/>
+                <path d="M0 0V14" stroke="#e3b65a" stroke-width="3" stroke-linecap="round"/>
+              </g>
+              <g id="muzzle-flash">
+                <circle cx="0" cy="-8" r="16" fill="none" stroke="#ffd166" stroke-width="3"/>
+                <circle cx="0" cy="-8" r="26" fill="none" stroke="#ff8a3d" stroke-width="2"/>
+              </g>
+            </g>
+            <circle cx="98" cy="214" r="9" fill="#2a2f24" stroke="#1f231b" stroke-width="2"/>
+            <circle cx="160" cy="214" r="9" fill="#2a2f24" stroke="#1f231b" stroke-width="2"/>
+          </g>
+          <g id="smoke" fill="#e9e5d6">
+            <circle class="smoke-puff" cx="232" cy="121" r="7"/>
+            <circle class="smoke-puff" cx="241" cy="115" r="6"/>
+            <circle class="smoke-puff" cx="228" cy="112" r="5"/>
+          </g>
+          <g id="projectile">
+            <path d="M-9 0L9 0M0 -6L0 6M-9 -6L-3 -3M9 -6L3 -3M-9 6L-3 3M9 6L3 3" stroke="#e3b65a" stroke-width="2.5" stroke-linecap="round"/><circle r="3" fill="#f3efdf" stroke="#1f231b" stroke-width="1.5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </header>
+
+  <main id="app" class="app">
+    <noscript><p class="noscript">This quiz needs JavaScript enabled in your browser.</p></noscript>
+
+    <section id="view-landing" class="view view-landing" aria-labelledby="landing-heading">
+      <h2 id="landing-heading">Before you begin</h2>
+      <div id="study-warning" class="study-warning">
+        <p><strong>This mock examination is a practice aid only.</strong> It cannot replace studying the complete Introduction to ISR Operations lesson, and repeated attempts are not a substitute for that study.</p>
+        <label class="study-confirm" for="study-confirm">
+          <input type="checkbox" id="study-confirm" autocomplete="off">
+          <span>I understand that I must study the complete lesson and not rely only on this mock examination.</span>
+        </label>
+      </div>
+
+      <h2 id="difficulty-heading" tabindex="-1">Choose a difficulty</h2>
+      <p id="mode-hint" class="mode-hint" role="status" aria-live="polite">Check the study confirmation above to enable the difficulty buttons.</p>
+      <div id="mode-list" class="mode-list" role="group" aria-labelledby="difficulty-heading">
+        <button type="button" id="mode-easy" class="mode-button mode-easy" disabled aria-describedby="mode-hint">
+          <span class="mode-name">Easy</span>
+          <span class="mode-desc">25 questions. One primary doctrinal judgment in each situation.</span>
+        </button>
+        <button type="button" id="mode-medium" class="mode-button mode-medium" disabled aria-describedby="mode-hint">
+          <span class="mode-name">Medium</span>
+          <span class="mode-desc">25 questions. Compare, diagnose, and choose among plausible options.</span>
+        </button>
+        <button type="button" id="mode-hard" class="mode-button mode-hard" disabled aria-describedby="mode-hint">
+          <span class="mode-name">Hard</span>
+          <span class="mode-desc">25 questions. Integrate several concepts under competing constraints.</span>
+        </button>
+      </div>
+      <p class="privacy-note">No login and no tracking. Your answers stay in this browser tab and are cleared when you refresh or close it.</p>
+    </section>
+
+    <section id="view-quiz" class="view view-quiz" hidden aria-labelledby="quiz-heading">
+      <h2 id="quiz-heading">Examination</h2>
+      <div class="quiz-progress">
+        <label for="quiz-progress">Answers checked</label>
+        <progress id="quiz-progress" max="25" value="0"></progress>
+        <p id="quiz-status" class="quiz-status" role="status" aria-live="polite"></p>
+      </div>
+      <h3 id="question-heading" class="question-heading" tabindex="-1">Question</h3>
+      <p id="question-category" class="question-category"></p>
+      <div id="question-area" class="question-area"></div>
+      <p id="validation-message" class="validation-message" role="alert" tabindex="-1" hidden></p>
+      <div id="answer-feedback" class="feedback" tabindex="-1" hidden></div>
+      <div class="quiz-actions">
+        <button type="button" id="btn-prev" class="secondary">Previous question</button>
+        <button type="button" id="btn-check">Check answer</button>
+        <button type="button" id="btn-next">Next question</button>
+        <button type="button" id="btn-finish">View results</button>
+      </div>
+    </section>
+
+    <section id="view-results" class="view view-results" hidden aria-labelledby="results-heading">
+      <h2 id="results-heading" tabindex="-1">Results</h2>
+      <div id="results-summary" class="results-summary"></div>
+      <p class="results-reminder">This score is practice feedback only. Study the complete lesson; do not rely only on this mock examination.</p>
+      <div class="results-actions">
+        <button type="button" id="btn-print" class="secondary">Print or save results</button>
+        <button type="button" id="btn-retake">Retake same difficulty</button>
+        <button type="button" id="btn-choose" class="secondary">Choose another difficulty</button>
+      </div>
+      <section class="results-topics" aria-labelledby="topics-heading">
+        <h3 id="topics-heading">Topic analysis</h3>
+        <div class="table-wrap">
+          <table id="results-categories">
+            <caption>Correct answers by primary topic. A topic is a strength at 75% or higher and a gap below 75%.</caption>
+            <thead>
+              <tr><th scope="col">Topic</th><th scope="col">Correct</th><th scope="col">Result</th></tr>
+            </thead>
+            <tbody id="results-categories-body"></tbody>
+          </table>
+        </div>
+        <h4>Strengths</h4>
+        <ul id="results-strengths" class="results-strengths"></ul>
+        <h4>Gaps to review in the lesson</h4>
+        <ul id="results-gaps" class="results-gaps"></ul>
+      </section>
+      <section class="results-review" aria-labelledby="review-heading">
+        <h3 id="review-heading">Full answer review</h3>
+        <ol id="results-review" class="review-list"></ol>
+      </section>
+    </section>
+
+    <section id="view-unavailable" class="view view-unavailable" hidden aria-labelledby="unavailable-heading">
+      <h2 id="unavailable-heading" tabindex="-1">Quiz unavailable</h2>
+      <p>The quiz is unavailable because its question data could not be loaded or did not pass validation, so no examination can start. Please try again later or inform your instructor.</p>
+    </section>
+  </main>
+
+  <script type="application/json" id="questions-easy">[{"id":1,"difficulty":"easy","category":"ISR Fundamentals and Components","tags":["surveillance"],"prompt":"A Philippine Army company posts a team to watch one bridge without interruption and log every crossing. Which ISR component is this activity?","options":["Surveillance","Reconnaissance","Intelligence","Dissemination"],"answer":0,"explanation":"Slide 26 defines surveillance as the continuous observation of a target.","sourceSlides":[26]},{"id":2,"difficulty":"easy","category":"ISR Fundamentals and Components","tags":["reconnaissance"],"prompt":"A patrol is sent to collect data that answers one specific commander question: can trucks use a jungle road? Which ISR component does this describe?","options":["Reconnaissance","Surveillance","Intelligence","Persistence"],"answer":0,"explanation":"Slide 26 defines reconnaissance as collecting data to address a specific military question.","sourceSlides":[26]},{"id":3,"difficulty":"easy","category":"ISR Fundamentals and Components","tags":["intelligence"],"prompt":"A battalion staff builds a product by combining the results of surveillance and reconnaissance with other data. What does the lesson call this product?","options":["Intelligence","Surveillance","Reconnaissance","A collection plan"],"answer":0,"explanation":"Slide 26 defines intelligence as the result of surveillance and reconnaissance combined with other data.","sourceSlides":[26]},{"id":4,"difficulty":"easy","category":"Roles and Importance of ISR","tags":["role of ISR","decision-making"],"prompt":"A brigade commander asks why the unit invests in ISR. Which purpose does the lesson state?","options":["To replace the commander's planning with automated orders","To limit intelligence to areas held by friendly forces","To avoid assessing combat effectiveness after operations","To give commanders information that aids decision-making"],"answer":3,"explanation":"Slide 28 says ISR aims to provide information to commanders to aid decision-making.","sourceSlides":[28]},{"id":5,"difficulty":"easy","category":"Roles and Importance of ISR","tags":["evaluate combat effectiveness"],"prompt":"After a training strike, the staff uses ISR to judge how well the strike worked. Which stated ISR aim is being served?","options":["Evaluating combat effectiveness","Supporting deception techniques","Alerting friendly forces to threats","Defining the operational environment"],"answer":0,"explanation":"Slide 28 lists evaluating combat effectiveness as an ISR aim.","sourceSlides":[28]},{"id":6,"difficulty":"easy","category":"Roles and Importance of ISR","tags":["ISR systems","unstructured data"],"prompt":"A student says ISR systems are limited to large satellites. Which statement from the lesson corrects this?","options":["ISR systems are limited to manned aircraft crews","ISR systems range in size from mobile devices to satellites","ISR systems can process structured records only","ISR systems are useful only in the air domain"],"answer":1,"explanation":"Slide 29 says ISR systems range from mobile devices to satellites and use unstructured data to extract insights.","sourceSlides":[29]},{"id":7,"difficulty":"easy","category":"Airborne ISR Systems","tags":["HALE"],"prompt":"A planner wants a platform that can operate extremely high for many hours because no pilot limits it. Which platform fits?","options":["A manned reconnaissance aircraft","A ground surveillance radar","A submarine","A high-altitude, long-endurance (HALE) vehicle"],"answer":3,"explanation":"Slide 36 says a HALE vehicle can operate extremely high for many hours since the pilot has no limitations.","sourceSlides":[36]},{"id":8,"difficulty":"easy","category":"Airborne ISR Systems","tags":["UAV","strike capability"],"prompt":"Staff ask what capability UAVs offer when they carry payloads such as missiles or precision-guided ammunition. Which is stated?","options":["Signals collection from a regular orbit","A flexible and persistent strike capability supporting ground or maritime operations","Concealed collection beneath the sea","Fixed observation from a low tower"],"answer":1,"explanation":"Slide 32 describes flexible, persistent strike capability against targets identified through ISR missions.","sourceSlides":[32]},{"id":9,"difficulty":"easy","category":"Airborne ISR Systems","tags":["manned reconnaissance aircraft"],"prompt":"A trainee calls manned reconnaissance aircraft a brand-new approach. What does the lesson say?","options":["It is the newest approach, developed after HALE vehicles","It is the traditional aerial approach, used since World War I","It began with satellites and was later adapted to aircraft","It is limited to maritime missions"],"answer":1,"explanation":"Slide 35 calls manned aircraft the more traditional approach, used since World War I.","sourceSlides":[35]},{"id":10,"difficulty":"easy","category":"Ground-Based ISR Systems","tags":["ground surveillance radar"],"prompt":"A post needs a radar it can move with a vehicle. Which lesson statement supports this?","options":["Ground surveillance radars are used only from satellite ground stations","Ground surveillance radars are carried only by aircraft","Ground surveillance radars operate only aboard surface ships","Ground surveillance radars can be fixed on a low tower or vehicle-mounted as mobile units"],"answer":3,"explanation":"Slide 37 says ground surveillance radars may be fixed, usually on a low tower, or mounted on a vehicle.","sourceSlides":[37]},{"id":11,"difficulty":"easy","category":"Ground-Based ISR Systems","tags":["sensor networks"],"prompt":"Which ground ISR resource has long been dropped behind enemy lines by Allied forces?","options":["High-altitude, long-endurance vehicles","Commercial imagery products","Submarine sensors","Fixed and mobile sensor networks"],"answer":3,"explanation":"Slide 38 says sensor networks are nothing new; sensors have been dropped behind enemy lines for decades.","sourceSlides":[38]},{"id":12,"difficulty":"easy","category":"Maritime ISR Platforms","tags":["surface fleet"],"prompt":"In a naval planning class, which force is described as the backbone of the Navy for maritime ISR?","options":["The surface warfare fleet","The aviation branches","The submarine force","Space-based sensors"],"answer":0,"explanation":"Slide 39 says the backbone of the Navy is its surface warfare fleet.","sourceSlides":[39]},{"id":13,"difficulty":"easy","category":"Maritime ISR Platforms","tags":["submarine"],"prompt":"Which maritime asset does the lesson call the most invisible asset in the entire military?","options":["The surface ship","The submarine","The ground surveillance radar","The HALE vehicle"],"answer":1,"explanation":"Slide 40 says submarines are the most invisible asset, giving them an incredible ability to gather information.","sourceSlides":[40]},{"id":14,"difficulty":"easy","category":"Space-Based ISR Systems","tags":["IMINT","satellite orbit"],"prompt":"A commander relies on satellite imagery alone. Which weakness does the lesson warn about?","options":["Satellite imagery is always blurred over the target","Satellites cannot observe large areas","Targets can track regular orbit cycles and avoid being seen","Satellite imagery is blocked out over friendly territory"],"answer":2,"explanation":"Slide 41 says satellites are in regular orbits, so targets can track the cycles and avoid being seen.","sourceSlides":[41]},{"id":15,"difficulty":"easy","category":"Space-Based ISR Systems","tags":["MASINT"],"prompt":"Which space-based discipline identifies distinctive target characteristics such as source, sender, or emitter type and location?","options":["IMINT","SIGINT","MASINT","HUMINT"],"answer":2,"explanation":"Slide 43 says MASINT identifies distinctive characteristics such as source, sender or emitter type and location.","sourceSlides":[43]},{"id":16,"difficulty":"easy","category":"Space-Based ISR Systems","tags":["commercial imagery"],"prompt":"A multinational partner needs imagery. Which advantage of commercial imagery does the lesson state?","options":["It is classified and restricted to national users","It comes only from government satellites","It is unclassified and benefits multinational partners","It cannot be disseminated to partners"],"answer":2,"explanation":"Slide 45 says commercial imagery products are unclassified and benefit multinational partners.","sourceSlides":[45]},{"id":17,"difficulty":"easy","category":"Timeliness, Accuracy, and Fusion","tags":["timeliness"],"prompt":"A report reaches the commander after the enemy has already moved. Which ISR principle was not met?","options":["Fusion","Coverage","Timeliness","Security"],"answer":2,"explanation":"Slide 49 says ISR prioritizes timely collection, processing and dissemination.","sourceSlides":[49]},{"id":18,"difficulty":"easy","category":"Timeliness, Accuracy, and Fusion","tags":["accuracy"],"prompt":"A report misidentifies a unit and leads to a wrong decision. Which principle was not met?","options":["Accuracy","Persistence","Flexibility","Interoperability"],"answer":0,"explanation":"Slide 50 says accuracy ensures reliable information and minimizes errors and misinterpretations.","sourceSlides":[50]},{"id":19,"difficulty":"easy","category":"Timeliness, Accuracy, and Fusion","tags":["fusion"],"prompt":"An analyst combines SIGINT, HUMINT and IMINT into one assessment. Which principle is applied?","options":["Coverage","Persistence","Security","Fusion"],"answer":3,"explanation":"Slide 51 describes fusion as using multiple sources such as SIGINT, HUMINT and IMINT.","sourceSlides":[51]},{"id":20,"difficulty":"easy","category":"Coverage, Persistence, and Flexibility","tags":["coverage"],"prompt":"A collection plan leaves one part of the area of interest unwatched. Which principle is not met?","options":["Timeliness","Coverage","Security","Fusion"],"answer":1,"explanation":"Slide 52 says effective ISR strives for comprehensive coverage of the area of interest.","sourceSlides":[52]},{"id":21,"difficulty":"easy","category":"Coverage, Persistence, and Flexibility","tags":["persistence"],"prompt":"A team keeps watching an area for days to detect changes and movements. Which principle does this show?","options":["Flexibility","Coverage","Accuracy","Persistence"],"answer":3,"explanation":"Slide 53 defines persistence as sustained, continuous monitoring over time.","sourceSlides":[53]},{"id":22,"difficulty":"easy","category":"Coverage, Persistence, and Flexibility","tags":["flexibility"],"prompt":"The enemy changes routes and the S2 redirects assets and adjusts collection priorities. Which principle is applied?","options":["Persistence","Interoperability","Flexibility","Security"],"answer":2,"explanation":"Slide 54 says ISR must adapt by redirecting assets and adjusting collection priorities.","sourceSlides":[54]},{"id":23,"difficulty":"easy","category":"Security, Interoperability, and Ethics","tags":["security"],"prompt":"A unit protects sensitive ISR information and assets against compromise by adversaries. Which principle is this?","options":["Interoperability","Ethical considerations","Security","Accuracy"],"answer":2,"explanation":"Slide 55 says ISR involves sensitive information and assets needing strict security measures.","sourceSlides":[55]},{"id":24,"difficulty":"easy","category":"Security, Interoperability, and Ethics","tags":["interoperability"],"prompt":"Army and allied ISR assets must coordinate in a coalition operation. Which principle applies?","options":["Fusion","Interoperability","Security","Coverage"],"answer":1,"explanation":"Slide 56 says coordination and interoperability among services and allied forces are essential.","sourceSlides":[56]},{"id":25,"difficulty":"easy","category":"Security, Interoperability, and Ethics","tags":["ethical considerations"],"prompt":"A team must collect within international law, rules of engagement and moral principles. Which principle governs this?","options":["Ethical considerations","Security","Accuracy","Flexibility"],"answer":0,"explanation":"Slide 57 says ethics guide collection, analysis and dissemination under law, rules of engagement and moral principles.","sourceSlides":[57]}]</script>
+  <script type="application/json" id="questions-medium">[{"id":1,"difficulty":"medium","category":"ISR Fundamentals and Components","tags":["surveillance","reconnaissance"],"prompt":"Team A watches a compound continuously. Team B collects data to decide whether one ford can carry trucks. Which pairing of ISR components is correct?","options":["A is reconnaissance; B is surveillance","A is surveillance; B is reconnaissance","Both are surveillance","Both are intelligence"],"answer":1,"explanation":"Slide 26 separates continuous observation of a target from collection to answer a specific question.","sourceSlides":[26]},{"id":2,"difficulty":"medium","category":"ISR Fundamentals and Components","tags":["intelligence"],"prompt":"A staff calls a single drone feed its whole intelligence estimate. Which critique fits the lesson?","options":["Intelligence means only the continuous observation of one target, so a single feed satisfies the definition","Intelligence results from surveillance and reconnaissance combined with other data, so one feed is not the full product","Intelligence means only data collected to answer one specific question, which one feed can supply directly","One feed is intelligence because modern sensors replace the need for surveillance, reconnaissance and other data"],"answer":1,"explanation":"Slide 26 defines intelligence as the combined result of surveillance, reconnaissance and other data.","sourceSlides":[26]},{"id":3,"difficulty":"medium","category":"ISR Fundamentals and Components","tags":["ISR definition","processing exploitation dissemination"],"prompt":"A staff plans sensors and assets but leaves out processing, exploitation and dissemination systems. Which lesson point is missed?","options":["ISR concerns sensor tasking only; other staff sections own processing and dissemination","ISR supports current operations only, not future ones, so processing links are optional","ISR integrates sensor and asset planning with processing, exploitation and dissemination systems","ISR relies on human intelligence teams alone, so technical systems are secondary"],"answer":2,"explanation":"Slide 22 defines ISR as synchronizing sensors, assets and processing, exploitation and dissemination systems.","sourceSlides":[22]},{"id":4,"difficulty":"medium","category":"Roles and Importance of ISR","tags":["anticipate enemy actions","operational environment"],"prompt":"A staff product predicts likely enemy actions and describes the operational environment. Which ISR aim does it serve?","options":["Evaluating combat effectiveness","Supporting military planning","Supporting deception techniques","Holding targets at risk of attack"],"answer":1,"explanation":"Slide 28 lists support to planning by anticipating enemy actions and defining the operational environment.","sourceSlides":[28]},{"id":5,"difficulty":"medium","category":"Roles and Importance of ISR","tags":["deception"],"prompt":"An analyst spots an enemy ruse and adjusts friendly plans, while the unit also runs its own deception. Which single ISR aim covers both?","options":["Supporting deception techniques and counteracting enemy deception","Identifying adversary vulnerabilities and weaknesses across the theater","Alerting friendly forces to threats approaching from any direction","Holding targets at risk of attack until they can be engaged"],"answer":0,"explanation":"Slide 28 pairs support for deception with counteracting enemy deception.","sourceSlides":[28]},{"id":6,"difficulty":"medium","category":"Roles and Importance of ISR","tags":["adversary vulnerabilities","hold targets at risk"],"prompt":"A team finds an unprotected enemy radar and then keeps it under threat of attack. Which ISR aims are served?","options":["Evaluating combat effectiveness and alerting friendly forces","Supporting deception and supporting planning","Informing commanders and evaluating effectiveness","Identifying adversary vulnerabilities and holding targets at risk"],"answer":3,"explanation":"Slide 28 lists identifying adversary vulnerabilities and holding targets at risk of attack.","sourceSlides":[28]},{"id":7,"difficulty":"medium","category":"Airborne ISR Systems","tags":["HALE","manned reconnaissance aircraft"],"prompt":"A unit needs very high, long-duration coverage. Which choice and reason fit the lesson?","options":["A manned reconnaissance aircraft, since its crew can stay extremely high for many hours","A HALE vehicle, since with no pilot aboard it can operate extremely high for many hours","A ground radar, since it can be dropped behind enemy lines","A manned aircraft, since World War I use proves its endurance"],"answer":1,"explanation":"Slide 36 ties HALE endurance to having no pilot limitations.","sourceSlides":[35,36]},{"id":8,"difficulty":"medium","category":"Airborne ISR Systems","tags":["UAV","strike capability"],"prompt":"A brief says armed UAVs are sensors with no strike role. What is the correction?","options":["Only manned aircraft may engage targets found through ISR, since UAVs carry sensors alone","UAVs may never engage targets identified in ISR missions, even when carrying missiles or bombs","UAVs with missiles, bombs or precision-guided ammunition can engage targets identified through ISR","Only HALE vehicles give persistent strike support to ground and maritime operations"],"answer":2,"explanation":"Slide 32 describes UAV payloads that engage ISR-identified targets.","sourceSlides":[32]},{"id":9,"difficulty":"medium","category":"Airborne ISR Systems","tags":["manned reconnaissance aircraft"],"prompt":"An instructor corrects a student's timeline for manned reconnaissance aircraft. Which timeline matches the lesson?","options":["First used in World War II and effective since World War I","Introduced with satellites and effective since the Cold War","Introduced with UAVs and effective since HALE vehicles","Used since World War I and with great effect since World War II"],"answer":3,"explanation":"Slide 35 says manned aircraft have been used since World War I and with great effect since World War II.","sourceSlides":[35]},{"id":10,"difficulty":"medium","category":"Ground-Based ISR Systems","tags":["ground surveillance radar"],"prompt":"A planner needs one radar for a fixed approach and another that can relocate. Which pairing matches the lesson?","options":["A satellite radar for the approach and a submarine radar for relocation","A vehicle-mounted radar for the approach and a tower-mounted radar for relocation","A tower-mounted fixed radar for the approach and a vehicle-mounted mobile radar for relocation","A HALE radar for both needs"],"answer":2,"explanation":"Slide 37 says ground radars are fixed, usually on a low tower, or vehicle-mounted mobile units.","sourceSlides":[37]},{"id":11,"difficulty":"medium","category":"Ground-Based ISR Systems","tags":["sensor networks"],"prompt":"A planner calls dropping sensors behind enemy lines untested. What does the lesson say?","options":["Sensor networks are a recent development used only by space-based forces and satellite operators","Sensor networks are nothing new; Allied forces have dropped sensors behind enemy lines for decades","Sensors have never been placed behind enemy lines because the risk of compromise is too high","Sensor networks work only when installed aboard surface ships of a naval fleet"],"answer":1,"explanation":"Slide 38 says sensors have been dropped behind enemy lines for decades.","sourceSlides":[38]},{"id":12,"difficulty":"medium","category":"Maritime ISR Platforms","tags":["submarine","surface fleet"],"prompt":"A planner wants a covert gatherer and a foundation for naval ISR. Which pairing fits?","options":["The surface fleet for covert gathering and a submarine as the backbone","Aviation branches for covert gathering and satellites as the backbone","A submarine for covert gathering and the surface fleet as the backbone","A submarine for both roles"],"answer":2,"explanation":"Slides 39-40 name the surface fleet as backbone and the submarine as the most invisible asset.","sourceSlides":[39,40]},{"id":13,"difficulty":"medium","category":"Maritime ISR Platforms","tags":["surface fleet","aviation branches"],"prompt":"An exercise treats aviation as the foundation of maritime ISR. What does the lesson say?","options":["Aviation branches are not important to maritime ISR","Submarines rather than the surface fleet are the backbone","Space assets replace the surface fleet","Aviation branches are crucial, but it all begins with surface warfare"],"answer":3,"explanation":"Slide 39 says aviation is crucial but naval strength begins with the surface fleet.","sourceSlides":[39]},{"id":14,"difficulty":"medium","category":"Space-Based ISR Systems","tags":["SIGINT"],"prompt":"A staff plans space-based SIGINT as a stand-alone replacement for aerial and ground SIGINT. Which correction fits?","options":["Use it in collaboration with aerial and ground-based SIGINT assets","Use it alone because its worldwide reach outranks aerial and ground SIGINT assets","Use it only as a last resort when aerial and ground assets are unavailable","Use it only for imagery tasks, leaving intercepts to aerial and ground teams"],"answer":0,"explanation":"Slide 42 says space-based SIGINT is a tool used in collaboration with aerial and ground assets.","sourceSlides":[42]},{"id":15,"difficulty":"medium","category":"Space-Based ISR Systems","tags":["space-based benefits","terrestrial-based benefits"],"prompt":"A commander needs collection in a denied area, and separately near-real-time video with local retasking. Which pairing fits?","options":["Space-based ISR for the denied area; company UAS for near-real-time video","Company UAS for the denied area; space-based ISR for video","Space-based ISR for both needs","Company UAS for both needs"],"answer":0,"explanation":"Slide 44 lists denied-area collection for space and near-real-time video and local tasking for company UAS.","sourceSlides":[44]},{"id":16,"difficulty":"medium","category":"Space-Based ISR Systems","tags":["commercial imagery"],"prompt":"A partner nation needs imagery but a staff insists on classified imagery only. Which approach fits the lesson?","options":["Withhold imagery from the partner because commercial products cannot help intelligence capabilities at all","Use classified imagery only, because commercial imagery is not relevant to the operations being planned","Use SIGINT products instead, because imagery of any kind cannot be shared with multinational partners","Use commercial imagery: unclassified, easily obtained and helpful to multinational partners"],"answer":3,"explanation":"Slide 45 lists these commercial imagery advantages.","sourceSlides":[45]},{"id":17,"difficulty":"medium","category":"Timeliness, Accuracy, and Fusion","tags":["accuracy","timeliness"],"prompt":"Report X arrived on time but misidentified a convoy. Report Y was correct but arrived after the convoy left. Which principle failed in each?","options":["X failed timeliness; Y failed accuracy","Both failed fusion","Both failed timeliness","X failed accuracy; Y failed timeliness"],"answer":3,"explanation":"Slides 49-50 pair timely delivery with reliable information.","sourceSlides":[49,50]},{"id":18,"difficulty":"medium","category":"Timeliness, Accuracy, and Fusion","tags":["fusion"],"prompt":"Which action best applies fusion?","options":["Sending the first report received straight to the commander so that the assessment is not delayed by checking","Assigning all collection to one sensor so that fewer people handle the information and security improves","Combining SIGINT, HUMINT and IMINT reporting before assessing the enemy position","Waiting for full coverage of the whole region before any report is given to the commander for a decision"],"answer":2,"explanation":"Slide 51 says ISR often draws on multiple intelligence sources.","sourceSlides":[51]},{"id":19,"difficulty":"medium","category":"Timeliness, Accuracy, and Fusion","tags":["timeliness"],"prompt":"Data was collected and processed but disseminated after the situation changed. Which principle applies?","options":["Coverage, which requires the whole area of interest to be watched by the available collection assets","Timeliness, which covers timely collection, processing and dissemination","Security, which requires strict protection of sensitive information and assets from compromise","Fusion, which requires several intelligence sources to be combined into a single product for the commander"],"answer":1,"explanation":"Slide 49 covers collection, processing and dissemination timing.","sourceSlides":[49]},{"id":20,"difficulty":"medium","category":"Coverage, Persistence, and Flexibility","tags":["coverage","persistence"],"prompt":"Team A sees the whole area briefly each day. Team B watches one road for three days. Which principle does each show best?","options":["A shows coverage; B shows persistence","A shows persistence; B shows coverage","A shows flexibility; B shows coverage","Both show persistence"],"answer":0,"explanation":"Slides 52-53 separate area-wide coverage from sustained monitoring over time.","sourceSlides":[52,53]},{"id":21,"difficulty":"medium","category":"Coverage, Persistence, and Flexibility","tags":["flexibility"],"prompt":"A collection plan cannot shift when the enemy changes route. Which principle is missing and what does it require?","options":["Flexibility: quickly redirecting assets and adjusting collection priorities","Persistence: keeping every asset on the original area so that continuous monitoring is never interrupted","Coverage: adding more assets to the original area only, so the old route stays fully watched","Security: classifying the collection plan more tightly so that the enemy cannot see it change"],"answer":0,"explanation":"Slide 54 says ISR must quickly redirect assets and adjust priorities.","sourceSlides":[54]},{"id":22,"difficulty":"medium","category":"Coverage, Persistence, and Flexibility","tags":["persistence","flexibility"],"prompt":"A commander wants continuous watch over an area and the ability to switch sensors as the enemy acts. Which principles are needed?","options":["Coverage and security","Accuracy and fusion","Timeliness and interoperability","Persistence and flexibility"],"answer":3,"explanation":"Slides 53-54 describe sustained monitoring and adaptable collection.","sourceSlides":[53,54]},{"id":23,"difficulty":"medium","category":"Security, Interoperability, and Ethics","tags":["security","interoperability"],"prompt":"A unit shares raw ISR with an ally over an unsecured chat to speed coordination. Which principle conflicts, and which motivates sharing?","options":["Interoperability conflicts; security motivates sharing","Security conflicts; interoperability motivates sharing","Ethics conflicts; accuracy motivates sharing","Fusion conflicts; coverage motivates sharing"],"answer":1,"explanation":"Slides 55-56 pair protection against compromise with coordination among allies.","sourceSlides":[55,56]},{"id":24,"difficulty":"medium","category":"Security, Interoperability, and Ethics","tags":["ethical considerations"],"prompt":"A team proposes intrusive surveillance beyond what law allows to improve coverage. Which principle limits it?","options":["Coverage, which requires monitoring everything in the area regardless of the law","Persistence, which requires continuous monitoring of the operational area over time","Ethical considerations, which follow international law, rules of engagement and moral principles","Flexibility, which requires changing collection methods as the mission evolves"],"answer":2,"explanation":"Slide 57 places collection under law, rules of engagement and moral principles.","sourceSlides":[57]},{"id":25,"difficulty":"medium","category":"Security, Interoperability, and Ethics","tags":["interoperability"],"prompt":"Allied services in a joint task force cannot exchange ISR because formats and radios are incompatible. Which principle is at issue?","options":["Interoperability, which requires coordination among services and allied forces","Fusion, which combines several intelligence types into one assessment","Security, which protects sensitive assets against compromise by adversaries","Persistence, which sustains continuous monitoring of the area over time"],"answer":0,"explanation":"Slide 56 stresses interoperability in joint and coalition environments.","sourceSlides":[56]}]</script>
+  <script type="application/json" id="questions-hard">[{"id":1,"difficulty":"hard","category":"ISR Fundamentals and Components","tags":["surveillance","reconnaissance","intelligence"],"prompt":"A brigade must continuously observe a hospital compound, learn whether a footbridge holds vehicles, and give the commander a product that combines both results with SIGINT. Which assignment of terms is correct?","options":["Reconnaissance for the compound, surveillance for the footbridge, intelligence for the combined product","Intelligence for the compound, surveillance for the footbridge, reconnaissance for the combined product","Surveillance for the compound, reconnaissance for the footbridge, intelligence for the combined product","Surveillance for both tasks, reconnaissance for the combined product"],"answer":2,"explanation":"Slide 26 defines all three components.","sourceSlides":[26]},{"id":2,"difficulty":"hard","category":"ISR Fundamentals and Components","tags":["ISR definition","processing exploitation dissemination"],"prompt":"Sensors collect useful data for a brigade, but no processing, exploitation or dissemination link reaches the commander. The S3 says ISR did its job. Which assessment is best?","options":["Complete: collection by sensors is all that ISR requires of the staff, since the commander can process it","Complete: intelligence is the product of collection, so processing and dissemination links do not affect the result","Incomplete only because too few human intelligence teams were used in the collection plan for this brigade","Incomplete: ISR must synchronize sensors, assets and processing, exploitation and dissemination systems in support of operations"],"answer":3,"explanation":"Slide 22 defines ISR as an integrated activity spanning sensors, assets and PED systems.","sourceSlides":[22]},{"id":3,"difficulty":"hard","category":"ISR Fundamentals and Components","tags":["ISR sources","ISR assets"],"prompt":"A commander asks which claim about ISR sources and assets is supported by the lesson.","options":["Sources are limited to optical imaging alone, and human intelligence teams are not treated as ISR assets","Assets are limited to satellites and unmanned aircraft, excluding ground, sea and human intelligence teams","Radar and infrared are excluded because ISR relies on electronic communications and optical sources only","Sources include electronic communications, optical, radar and infrared imaging, and assets include human intelligence teams"],"answer":3,"explanation":"Slide 23 lists these sources and assets.","sourceSlides":[23]},{"id":4,"difficulty":"hard","category":"Roles and Importance of ISR","tags":["anticipate enemy actions","adversary vulnerabilities","deception"],"prompt":"Before an offensive, a brigade wants to predict enemy reaction, find where the enemy is weakest, and detect enemy deception. Which ISR aims match?","options":["Evaluating combat effectiveness, holding targets at risk, alerting friendly forces","Anticipating enemy actions, identifying adversary vulnerabilities, counteracting deception","Alerting friendly forces, evaluating effectiveness, defining the environment","Holding targets at risk, supporting deception, evaluating effectiveness"],"answer":1,"explanation":"Slide 28 lists all three aims.","sourceSlides":[28]},{"id":5,"difficulty":"hard","category":"Roles and Importance of ISR","tags":["ISR systems","unstructured data"],"prompt":"A staff receives unstructured imagery, text and signals feeds from small mobile devices and a satellite. Which statement is most consistent with the lesson?","options":["ISR systems process only structured data and ignore unstructured feeds from small mobile devices and satellites","Only large satellites produce insights that commanders can use, because small mobile devices are too limited","Faster information flow tends to slow decision-making because staffs become overloaded with feeds","ISR systems from mobile devices to satellites use unstructured data to extract insights that speed better decisions"],"answer":3,"explanation":"Slide 29 describes these ISR systems and their insights.","sourceSlides":[29]},{"id":6,"difficulty":"hard","category":"Roles and Importance of ISR","tags":["support to planning","evaluate combat effectiveness"],"prompt":"Higher headquarters wants ISR to support planning, but the staff supplies only post-attack combat-effectiveness assessments. Which is the gap?","options":["No gap: combat-effectiveness assessment fulfills every ISR aim","Support to planning is missing; evaluating effectiveness is only one stated aim","No gap: planning support is an operations task, not an ISR aim","The gap is deception support, the only aim tied to planning"],"answer":1,"explanation":"Slide 28 lists planning support and evaluation as separate aims.","sourceSlides":[28]},{"id":7,"difficulty":"hard","category":"Airborne ISR Systems","tags":["HALE","UAV"],"prompt":"A task force needs long, high-altitude overhead coverage and a way to engage targets found through ISR. Which combination fits?","options":["A HALE platform for endurance and an armed UAV for engagement","A manned aircraft for endurance and a HALE vehicle for engagement","A ground radar for endurance and a submarine for engagement","A satellite for endurance and a sensor network for engagement"],"answer":0,"explanation":"Slides 32 and 36 support HALE endurance and armed UAV engagement.","sourceSlides":[32,36]},{"id":8,"difficulty":"hard","category":"Airborne ISR Systems","tags":["manned reconnaissance aircraft","UAV"],"prompt":"An instructor asks which airborne system is the traditional approach and which offers flexible, persistent strike after target identification.","options":["UAVs are the traditional approach, while manned reconnaissance aircraft provide flexible persistent strike","HALE vehicles are the traditional approach, while manned aircraft provide flexible persistent strike","Manned reconnaissance aircraft are traditional; UAVs with payloads give flexible persistent strike","Manned aircraft are the traditional approach and also provide flexible persistent strike after target identification"],"answer":2,"explanation":"Slides 32 and 35 support this pairing.","sourceSlides":[32,35]},{"id":9,"difficulty":"hard","category":"Airborne ISR Systems","tags":["HALE","UAV","manned reconnaissance aircraft"],"prompt":"A plan makes four airborne statements. Which one is wrong?","options":["UAVs with missiles can engage targets identified through ISR","HALE vehicles are limited by pilot endurance to short sorties","Manned reconnaissance aircraft have been used since World War I","HALE vehicles can operate extremely high for many hours"],"answer":1,"explanation":"Slide 36 says HALE vehicles operate for many hours since no pilot limits them.","sourceSlides":[32,35,36]},{"id":10,"difficulty":"hard","category":"Ground-Based ISR Systems","tags":["ground surveillance radar","sensor networks"],"prompt":"A border post must watch a fixed crossing, later relocate its watch, and add sensors beyond friendly lines. Which mix fits?","options":["Tower-mounted radar, vehicle-mounted radar for relocation, and sensor networks dropped beyond friendly lines","Satellite imagery, submarine sensors, and commercial imagery","HALE vehicles for the crossing, a submarine for relocation, sensor networks for the border","Vehicle radar only, since towers cannot detect crossings"],"answer":0,"explanation":"Slides 37-38 cover fixed and mobile radars and sensor networks.","sourceSlides":[37,38]},{"id":11,"difficulty":"hard","category":"Ground-Based ISR Systems","tags":["terrestrial-based benefits","company UAS"],"prompt":"A company commander with organic UAS asks which benefits of terrestrial-based ISR apply.","options":["Unrestricted worldwide coverage, beyond-line-of-sight coverage, and denied-area collection","Unclassified imagery, easy access, and multinational sharing","Near-real-time video, local approval for relocation and tasking, and effects after target identification","Silent operation, invisibility to the enemy, and surface-fleet support"],"answer":2,"explanation":"Slide 44 lists these terrestrial benefits.","sourceSlides":[44]},{"id":12,"difficulty":"hard","category":"Maritime ISR Platforms","tags":["submarine","surface fleet","satellite"],"prompt":"A naval plan uses a submarine for covert collection, the surface fleet as its foundation, and satellites for huge areas. Which assessment fits the lesson?","options":["Flawed: satellites are never useful for maritime ISR because ships move too quickly for orbital passes","Flawed: submarines are the backbone and the surface fleet is the most invisible asset in the military","Flawed: aviation is the backbone of maritime ISR, with the surface fleet playing only a supporting part","Sound: submarines are most invisible, the surface fleet is the backbone, and satellite orbits can be tracked by targets"],"answer":3,"explanation":"Slides 39-41 support each role.","sourceSlides":[39,40,41]},{"id":13,"difficulty":"hard","category":"Maritime ISR Platforms","tags":["satellite orbit","maritime ISR"],"prompt":"An adversary times strait movements to avoid satellite passes. Which adjustment fits the lesson?","options":["Rely on satellites more, because their regular orbits guarantee predictable coverage of the strait","Add maritime and airborne assets, because targets can track regular orbit cycles","Drop maritime assets, since satellites already cover huge areas and no other asset is needed","Wait for the next satellite pass before acting, because timing collection to orbits removes the risk"],"answer":1,"explanation":"Slide 41 warns that targets can track orbit cycles and avoid being seen.","sourceSlides":[39,40,41]},{"id":14,"difficulty":"hard","category":"Space-Based ISR Systems","tags":["IMINT","SIGINT","MASINT"],"prompt":"Analysts need broad-area imagery, intercepts complementing aerial and ground SIGINT, and emitter type and location. Which mapping is correct?","options":["IMINT, SIGINT, MASINT","SIGINT, IMINT, MASINT","MASINT, SIGINT, IMINT","IMINT, MASINT, SIGINT"],"answer":0,"explanation":"Slides 41-43 describe each space-based discipline.","sourceSlides":[41,42,43]},{"id":15,"difficulty":"hard","category":"Space-Based ISR Systems","tags":["space-based benefits","commercial imagery","company UAS"],"prompt":"A staff needs a denied area covered, imagery shared with a partner, and near-real-time video. Which mapping fits?","options":["Company UAS, space-based ISR, commercial imagery","Commercial imagery, company UAS, space-based ISR","Space-based ISR, commercial imagery, company UAS","Space-based ISR, company UAS, commercial imagery"],"answer":2,"explanation":"Slides 44-45 support this mapping.","sourceSlides":[44,45]},{"id":16,"difficulty":"hard","category":"Space-Based ISR Systems","tags":["satellite orbit","SIGINT"],"prompt":"A staff over-relies on satellites for worldwide coverage. Which two cautions fit the lesson?","options":["Imagery is blurred, and commercial imagery is classified","Satellites cannot see large areas, and targets ignore orbits","Space SIGINT works alone, and orbits are unpredictable","Targets can track orbits, and space SIGINT works with aerial and ground SIGINT"],"answer":3,"explanation":"Slides 41-42 give both cautions.","sourceSlides":[41,42]},{"id":17,"difficulty":"hard","category":"Timeliness, Accuracy, and Fusion","tags":["timeliness","fusion","accuracy"],"prompt":"Three reports show a late delivery, a single-source assessment, and a wrong identification. Which principles failed, in order?","options":["Timeliness, fusion, accuracy","Fusion, timeliness, accuracy","Accuracy, fusion, timeliness","Timeliness, accuracy, fusion"],"answer":0,"explanation":"Slides 49-51 define these principles.","sourceSlides":[49,50,51]},{"id":18,"difficulty":"hard","category":"Timeliness, Accuracy, and Fusion","tags":["fusion","accuracy"],"prompt":"Which change best improves both accuracy and fusion when identifying a convoy?","options":["Report immediately from the IMINT sighting alone so that the commander receives the information sooner","Wait until the entire region has been covered before reporting anything about the convoy","Corroborate the IMINT sighting with SIGINT and HUMINT before reporting it","Restrict reporting to one sensor for security so that fewer sources can be compromised"],"answer":2,"explanation":"Slides 50-51 support corroboration across sources.","sourceSlides":[50,51]},{"id":19,"difficulty":"hard","category":"Timeliness, Accuracy, and Fusion","tags":["timeliness"],"prompt":"Proposal X skips processing to send raw feeds instantly. Proposal Y collects, processes and disseminates promptly. Which reflects timeliness?","options":["Y, because timeliness covers timely collection, processing and dissemination together","X, because dissemination is the only step of the intelligence flow that timeliness concerns","X, because processing always harms timeliness and should be dropped from every ISR flow","Y, because timeliness applies to collection only and dissemination is a separate matter"],"answer":0,"explanation":"Slide 49 names collection, processing and dissemination.","sourceSlides":[49]},{"id":20,"difficulty":"hard","category":"Coverage, Persistence, and Flexibility","tags":["coverage","persistence","flexibility"],"prompt":"A commander needs the whole area watched, monitoring over days, and quick redirection when the enemy moves. Which principles match, in order?","options":["Persistence, coverage, flexibility","Coverage, persistence, flexibility","Flexibility, persistence, coverage","Coverage, flexibility, persistence"],"answer":1,"explanation":"Slides 52-54 define these principles.","sourceSlides":[52,53,54]},{"id":21,"difficulty":"hard","category":"Coverage, Persistence, and Flexibility","tags":["flexibility","coverage"],"prompt":"A commander redirects sensors after intelligence shows a new enemy route, leaving the old sector unwatched. What should the staff say?","options":["Redirecting violates persistence entirely and the sensors must be moved back to the old sector at once","Redirecting fits flexibility, but the plan should still strive for coverage of the area of interest","Coverage is met because watching the new route alone satisfies the whole area of interest","Flexibility means the old sector no longer matters once new intelligence has appeared"],"answer":1,"explanation":"Slides 52 and 54 support both flexibility and coverage.","sourceSlides":[52,54]},{"id":22,"difficulty":"hard","category":"Coverage, Persistence, and Flexibility","tags":["persistence"],"prompt":"A cell samples a village once a week while enemy movements happen between visits. Which gap and fix fit?","options":["Coverage: add more villages to the weekly sampling plan so that a larger area is visited","Interoperability: adopt allied radios so that the cell can share its weekly findings faster","Persistence: sustained, continuous monitoring to detect changes and movements","Security: conceal the weekly visits so that the enemy does not notice the cell sampling the village"],"answer":2,"explanation":"Slide 53 defines persistence as continuous monitoring over time.","sourceSlides":[53]},{"id":23,"difficulty":"hard","category":"Security, Interoperability, and Ethics","tags":["security","interoperability"],"prompt":"An allied liaison asks for raw feeds from a sensitive asset. Which approach fits the lesson?","options":["Drop security measures entirely so that interoperability with allies is maximized","Refuse all coordination with allies so that security of the assets is maximized","Coordinate with allies while applying strict security to sensitive information and assets","Let ethics override both"],"answer":2,"explanation":"Slides 55-56 support both principles together.","sourceSlides":[55,56]},{"id":24,"difficulty":"hard","category":"Security, Interoperability, and Ethics","tags":["ethical considerations","coverage"],"prompt":"Better coverage would require collection outside the rules of engagement. What does the lesson support?","options":["Ethical considerations govern: collection must follow law, rules of engagement and moral principles","Coverage overrides because comprehensive coverage of the area of interest is the objective of ISR","Timeliness overrides because current information matters more than the rules governing collection","Fusion overrides because combining more sources is better than staying within the rules of engagement"],"answer":0,"explanation":"Slide 57 places collection under law and rules of engagement.","sourceSlides":[52,57]},{"id":25,"difficulty":"hard","category":"Security, Interoperability, and Ethics","tags":["security","interoperability","ethical considerations"],"prompt":"A feed is compromised, allied units cannot read its format, and collection broke the law. Which principles failed, in order?","options":["Interoperability, security, ethical considerations","Ethical considerations, security, interoperability","Security, ethical considerations, interoperability","Security, interoperability, ethical considerations"],"answer":3,"explanation":"Slides 55-57 define these principles.","sourceSlides":[55,56,57]}]</script>
+  <script>
+  (function () {
+    'use strict';
+
+    var MODES = ['easy', 'medium', 'hard'];
+    var MODE_LABELS = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
+    var QUESTION_COUNT = 25;
+    var LETTERS = ['A', 'B', 'C', 'D'];
+    var CATEGORY_ORDER = [
+      'ISR Fundamentals and Components',
+      'Roles and Importance of ISR',
+      'Airborne ISR Systems',
+      'Ground-Based ISR Systems',
+      'Maritime ISR Platforms',
+      'Space-Based ISR Systems',
+      'Timeliness, Accuracy, and Fusion',
+      'Coverage, Persistence, and Flexibility',
+      'Security, Interoperability, and Ethics'
+    ];
+    // A primary topic counts as a strength at or above this percentage, otherwise a gap.
+    var STRENGTH_THRESHOLD = 75;
+    // Mastery bands, checked from the top: the first band whose minimum is met applies.
+    var MASTERY_BANDS = [
+      { min: 90, name: 'Mastery', description: 'Consistent command of the lesson at this difficulty.' },
+      { min: 75, name: 'Proficient', description: 'Solid understanding. Restudy the topics listed as gaps.' },
+      { min: 60, name: 'Developing', description: 'Partial understanding. Restudy the lesson before retaking.' },
+      { min: 0, name: 'Needs review', description: 'Study the complete lesson again before another attempt.' }
+    ];
+
+    // Mirrors validateQuestion in scripts/build.mjs; the verifier checks both agree error-for-error.
+    function validateQuestion(question, expectedDifficulty, expectedId) {
+      if (question === null || typeof question !== 'object' || Array.isArray(question)) {
+        return ['question must be an object'];
+      }
+      var errors = [];
+      if (!Number.isInteger(question.id) || question.id !== expectedId) {
+        errors.push('id must be integer ' + expectedId);
+      }
+      if (question.difficulty !== expectedDifficulty) {
+        errors.push('difficulty must be ' + expectedDifficulty);
+      }
+      ['category', 'prompt', 'explanation'].forEach(function (field) {
+        if (typeof question[field] !== 'string' || !question[field].trim()) {
+          errors.push(field + ' must be a nonempty string');
+        }
+      });
+      if (!Array.isArray(question.tags) || question.tags.some(function (tag) { return typeof tag !== 'string' || !tag.trim(); })) {
+        errors.push('tags must be an array of nonempty strings');
+      }
+      if (!Array.isArray(question.options) || question.options.length !== 4 || question.options.some(function (option) { return typeof option !== 'string' || !option.trim(); })) {
+        errors.push('options must contain four nonempty strings');
+      }
+      if (!Number.isInteger(question.answer) || question.answer < 0 || question.answer > 3) {
+        errors.push('answer must be an integer from 0 to 3');
+      }
+      if (!Array.isArray(question.sourceSlides) || question.sourceSlides.length === 0 || question.sourceSlides.some(function (slide) { return !Number.isInteger(slide) || slide < 21 || slide > 58; })) {
+        errors.push('sourceSlides must contain integers from 21 to 58');
+      }
+      return errors;
+    }
+
+    function validateBanks(banks) {
+      if (banks === null || typeof banks !== 'object') {
+        return { valid: false, errors: ['question banks must be an object'] };
+      }
+      var errors = [];
+      MODES.forEach(function (mode) {
+        var bank = banks[mode];
+        if (!Array.isArray(bank)) {
+          errors.push(mode + ' bank must be an array of ' + QUESTION_COUNT + ' questions');
+          return;
+        }
+        if (bank.length !== QUESTION_COUNT) {
+          errors.push(mode + ' bank must contain exactly ' + QUESTION_COUNT + ' questions (found ' + bank.length + ')');
+        }
+        bank.forEach(function (question, index) {
+          validateQuestion(question, mode, index + 1).forEach(function (error) {
+            errors.push(mode + ' question ' + (index + 1) + ': ' + error);
+          });
+        });
+      });
+      return { valid: errors.length === 0, errors: errors };
+    }
+
+    // Fisher-Yates shuffle of a copy; the source array is never mutated.
+    function shuffleQuestions(bank, random) {
+      if (typeof random !== 'function') random = Math.random;
+      var copy = Array.prototype.slice.call(bank);
+      for (var i = copy.length - 1; i > 0; i--) {
+        var j = Math.min(i, Math.max(0, Math.floor(random() * (i + 1))));
+        var held = copy[i];
+        copy[i] = copy[j];
+        copy[j] = held;
+      }
+      return copy;
+    }
+
+    function createAttempt(mode, banks, random) {
+      if (MODES.indexOf(mode) === -1) throw new Error('Unknown difficulty: ' + mode);
+      var questions = shuffleQuestions(banks[mode], random);
+      return {
+        mode: mode,
+        questions: questions,
+        current: 0,
+        responses: questions.map(function () { return { selected: null, checked: false }; })
+      };
+    }
+
+    function masteryBand(percentage) {
+      for (var i = 0; i < MASTERY_BANDS.length; i++) {
+        if (percentage >= MASTERY_BANDS[i].min) return MASTERY_BANDS[i];
+      }
+      return MASTERY_BANDS[MASTERY_BANDS.length - 1];
+    }
+
+    function computeResults(attempt) {
+      var byCategory = {};
+      var order = CATEGORY_ORDER.slice();
+      var score = 0;
+      var review = attempt.questions.map(function (question, index) {
+        var response = attempt.responses[index];
+        var correct = response.selected === question.answer;
+        if (correct) score++;
+        if (!byCategory[question.category]) {
+          byCategory[question.category] = { category: question.category, correct: 0, total: 0 };
+          if (order.indexOf(question.category) === -1) order.push(question.category);
+        }
+        byCategory[question.category].total++;
+        if (correct) byCategory[question.category].correct++;
+        return { number: index + 1, question: question, selected: response.selected, correct: correct };
+      });
+      var total = attempt.questions.length;
+      var percentage = total ? Math.round((score / total) * 100) : 0;
+      var categories = order.filter(function (name) { return byCategory[name]; }).map(function (name) {
+        var entry = byCategory[name];
+        entry.percentage = Math.round((entry.correct / entry.total) * 100);
+        entry.status = entry.percentage >= STRENGTH_THRESHOLD ? 'Strength' : 'Gap';
+        return entry;
+      });
+      return {
+        mode: attempt.mode,
+        score: score,
+        total: total,
+        percentage: percentage,
+        band: masteryBand(percentage),
+        categories: categories,
+        review: review
+      };
+    }
+
+    function deepFreeze(value) {
+      if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+        Object.freeze(value);
+        Object.keys(value).forEach(function (key) { deepFreeze(value[key]); });
+      }
+      return value;
+    }
+
+    // ----- State and DOM -----
+
+    var state = {
+      available: false,
+      errors: [],
+      banks: null,
+      studyConfirmed: false,
+      view: 'landing',
+      attempt: null,
+      results: null,
+      random: Math.random
+    };
+
+    function byId(id) { return document.getElementById(id); }
+
+    var ui = {
+      views: {
+        landing: byId('view-landing'),
+        quiz: byId('view-quiz'),
+        results: byId('view-results'),
+        unavailable: byId('view-unavailable')
+      },
+      studyConfirm: byId('study-confirm'),
+      modeHint: byId('mode-hint'),
+      difficultyHeading: byId('difficulty-heading'),
+      unavailableHeading: byId('unavailable-heading'),
+      modeButtons: {
+        easy: byId('mode-easy'),
+        medium: byId('mode-medium'),
+        hard: byId('mode-hard')
+      },
+      quizHeading: byId('quiz-heading'),
+      quizProgress: byId('quiz-progress'),
+      quizStatus: byId('quiz-status'),
+      questionHeading: byId('question-heading'),
+      questionCategory: byId('question-category'),
+      questionArea: byId('question-area'),
+      validation: byId('validation-message'),
+      feedback: byId('answer-feedback'),
+      btnPrev: byId('btn-prev'),
+      btnCheck: byId('btn-check'),
+      btnNext: byId('btn-next'),
+      btnFinish: byId('btn-finish'),
+      resultsHeading: byId('results-heading'),
+      resultsSummary: byId('results-summary'),
+      resultsCategories: byId('results-categories-body'),
+      resultsStrengths: byId('results-strengths'),
+      resultsGaps: byId('results-gaps'),
+      resultsReview: byId('results-review'),
+      btnPrint: byId('btn-print'),
+      btnRetake: byId('btn-retake'),
+      btnChoose: byId('btn-choose'),
+      radios: []
+    };
+
+    function make(tag, className, text) {
+      var node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    // Empties a node and appends the given nodes; avoids the Safari 14+ only children-replacement API.
+    function setChildren(node, children) {
+      node.textContent = '';
+      children.forEach(function (child) { node.appendChild(child); });
+    }
+
+    function optionText(question, index) {
+      return LETTERS[index] + '. ' + question.options[index];
+    }
+
+    function showView(name) {
+      state.view = name;
+      Object.keys(ui.views).forEach(function (key) {
+        ui.views[key].hidden = key !== name;
+      });
+      // Lets the stylesheet compact the hero outside the landing view.
+      document.body.setAttribute('data-view', name);
+    }
+
+    // Difficulty accent for the page: theme-easy, theme-medium or theme-hard; null clears it.
+    function setTheme(mode) {
+      MODES.forEach(function (key) {
+        document.body.classList.toggle('theme-' + key, key === mode);
+      });
+    }
+
+    function hideValidation() {
+      ui.validation.textContent = '';
+      ui.validation.hidden = true;
+    }
+
+    function showValidation(message) {
+      ui.validation.textContent = message;
+      ui.validation.hidden = false;
+      ui.validation.focus();
+    }
+
+    function checkedCount(attempt) {
+      return attempt.responses.filter(function (response) { return response.checked; }).length;
+    }
+
+    function firstUncheckedIndex(attempt) {
+      for (var i = 0; i < attempt.responses.length; i++) {
+        if (!attempt.responses[i].checked) return i;
+      }
+      return -1;
+    }
+
+    // ----- Study gate -----
+
+    function setStudyConfirmed(confirmed) {
+      state.studyConfirmed = Boolean(confirmed) && state.available;
+      ui.studyConfirm.checked = state.studyConfirmed;
+      MODES.forEach(function (mode) {
+        ui.modeButtons[mode].disabled = !state.studyConfirmed;
+      });
+      if (state.available) {
+        ui.modeHint.textContent = state.studyConfirmed
+          ? 'Difficulty buttons enabled. Choose Easy, Medium, or Hard to begin.'
+          : 'Check the study confirmation above to enable the difficulty buttons.';
+      }
+      return state.studyConfirmed;
+    }
+
+    // ----- Quiz flow -----
+
+    function startQuiz(mode) {
+      if (!state.available || !state.studyConfirmed || MODES.indexOf(mode) === -1) return false;
+      state.attempt = createAttempt(mode, state.banks, state.random);
+      state.results = null;
+      setTheme(mode);
+      showView('quiz');
+      renderQuestion();
+      ui.questionHeading.focus();
+      return true;
+    }
+
+    function renderQuestion() {
+      var attempt = state.attempt;
+      var index = attempt.current;
+      var question = attempt.questions[index];
+      var response = attempt.responses[index];
+      var done = checkedCount(attempt);
+      var total = attempt.questions.length;
+
+      ui.quizHeading.textContent = MODE_LABELS[attempt.mode] + ' examination';
+      ui.quizProgress.setAttribute('max', String(total));
+      ui.quizProgress.setAttribute('value', String(done));
+      ui.quizStatus.textContent = 'Question ' + (index + 1) + ' of ' + total + '. ' + done + ' of ' + total + ' answers checked.';
+      ui.questionHeading.textContent = 'Question ' + (index + 1) + ' of ' + total;
+      ui.questionCategory.textContent = 'Topic: ' + question.category;
+
+      var fieldset = make('fieldset', 'question-fieldset');
+      fieldset.id = 'question-fieldset';
+      var legend = make('legend', 'question-prompt', question.prompt);
+      legend.id = 'question-prompt';
+      fieldset.appendChild(legend);
+      ui.radios = question.options.map(function (option, optionIndex) {
+        var inputId = 'answer-option-' + optionIndex;
+        var label = make('label', 'option');
+        label.htmlFor = inputId;
+        var input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'answer';
+        input.id = inputId;
+        input.value = String(optionIndex);
+        input.checked = response.selected === optionIndex;
+        input.disabled = response.checked;
+        input.addEventListener('change', function () { selectAnswer(optionIndex); });
+        var body = make('span', 'option-body');
+        body.append(make('span', 'option-letter', LETTERS[optionIndex] + '.'), ' ', make('span', 'option-text', option));
+        if (response.checked && optionIndex === question.answer) {
+          label.classList.add('option-correct');
+          body.appendChild(make('span', 'option-tag', 'Correct answer'));
+        } else if (response.checked && optionIndex === response.selected) {
+          label.classList.add('option-incorrect');
+          body.appendChild(make('span', 'option-tag', 'Your answer'));
+        }
+        label.append(input, body);
+        fieldset.appendChild(label);
+        return input;
+      });
+      setChildren(ui.questionArea, [fieldset]);
+
+      hideValidation();
+      renderFeedback(question, response);
+
+      var allChecked = done === total;
+      ui.btnPrev.hidden = index === 0;
+      ui.btnCheck.hidden = response.checked;
+      ui.btnNext.hidden = !response.checked || index === total - 1;
+      ui.btnFinish.hidden = !allChecked;
+    }
+
+    function renderFeedback(question, response) {
+      if (!response.checked) {
+        ui.feedback.className = 'feedback';
+        setChildren(ui.feedback, []);
+        ui.feedback.hidden = true;
+        return;
+      }
+      var correct = response.selected === question.answer;
+      ui.feedback.className = 'feedback ' + (correct ? 'feedback-correct' : 'feedback-incorrect');
+      var verdict = make('p', 'feedback-verdict');
+      verdict.appendChild(make('strong', null, correct ? 'Correct.' : 'Incorrect.'));
+      var parts = [verdict];
+      if (!correct) parts.push(make('p', 'feedback-selected', 'Your answer: ' + optionText(question, response.selected)));
+      parts.push(
+        make('p', 'feedback-answer', 'Correct answer: ' + optionText(question, question.answer)),
+        make('p', 'feedback-explanation', 'Explanation: ' + question.explanation),
+        make('p', 'feedback-source', 'Lesson reference: slide ' + question.sourceSlides.join(', '))
+      );
+      setChildren(ui.feedback, parts);
+      ui.feedback.hidden = false;
+    }
+
+    function selectAnswer(index) {
+      var attempt = state.attempt;
+      if (state.view !== 'quiz' || !attempt) return false;
+      var response = attempt.responses[attempt.current];
+      if (response.checked || !Number.isInteger(index) || index < 0 || index > 3) {
+        ui.radios.forEach(function (radio, radioIndex) { radio.checked = response.selected === radioIndex; });
+        return false;
+      }
+      response.selected = index;
+      ui.radios.forEach(function (radio, radioIndex) { radio.checked = radioIndex === index; });
+      hideValidation();
+      return true;
+    }
+
+    function checkAnswer() {
+      var attempt = state.attempt;
+      if (state.view !== 'quiz' || !attempt) return false;
+      var response = attempt.responses[attempt.current];
+      if (response.checked) return false;
+      if (response.selected === null) {
+        showValidation('Select an answer before pressing Check answer.');
+        return false;
+      }
+      response.checked = true;
+      renderQuestion();
+      ui.feedback.focus();
+      return true;
+    }
+
+    function goToQuestion(index) {
+      var attempt = state.attempt;
+      if (state.view !== 'quiz' || !attempt || !Number.isInteger(index)) return false;
+      if (index < 0 || index >= attempt.questions.length) return false;
+      var limit = firstUncheckedIndex(attempt);
+      if (limit !== -1 && index > limit) return false;
+      attempt.current = index;
+      renderQuestion();
+      ui.questionHeading.focus();
+      return true;
+    }
+
+    function finishQuiz() {
+      var attempt = state.attempt;
+      if (state.view !== 'quiz' || !attempt) return false;
+      if (firstUncheckedIndex(attempt) !== -1) {
+        showValidation('Check all ' + attempt.questions.length + ' answers before viewing results.');
+        return false;
+      }
+      state.results = computeResults(attempt);
+      renderResults(state.results);
+      showView('results');
+      ui.resultsHeading.focus();
+      return true;
+    }
+
+    function retakeQuiz() {
+      var mode = state.attempt ? state.attempt.mode : null;
+      if (!mode) return false;
+      return startQuiz(mode);
+    }
+
+    function resetToDifficulty() {
+      if (!state.available) return false;
+      state.attempt = null;
+      state.results = null;
+      setTheme(null);
+      showView('landing');
+      setStudyConfirmed(state.studyConfirmed);
+      ui.difficultyHeading.focus();
+      return true;
+    }
+
+    // ----- Results -----
+
+    function renderResults(results) {
+      ui.resultsHeading.textContent = MODE_LABELS[results.mode] + ' examination results';
+
+      var score = make('p', 'results-score');
+      score.append(make('strong', null, 'Score: '), results.score + ' of ' + results.total + ' correct (' + results.percentage + '%)');
+      var band = make('p', 'results-band');
+      band.append(make('strong', null, 'Mastery band: '), results.band.name + '. ' + results.band.description);
+      setChildren(ui.resultsSummary, [score, band]);
+
+      var rows = results.categories.map(function (entry) {
+        var row = document.createElement('tr');
+        var name = make('th', null, entry.category);
+        name.setAttribute('scope', 'row');
+        row.append(name, make('td', null, entry.correct + ' of ' + entry.total + ' (' + entry.percentage + '%)'), make('td', null, entry.status));
+        return row;
+      });
+      setChildren(ui.resultsCategories, rows);
+
+      renderTopicList(ui.resultsStrengths, results.categories.filter(function (entry) { return entry.status === 'Strength'; }), 'No topic reached 75% in this attempt.');
+      renderTopicList(ui.resultsGaps, results.categories.filter(function (entry) { return entry.status === 'Gap'; }), 'No gaps in this attempt. Keep studying the complete lesson.');
+
+      var items = results.review.map(function (entry) {
+        var question = entry.question;
+        var item = make('li', 'review-item ' + (entry.correct ? 'review-correct' : 'review-incorrect'));
+        item.append(
+          make('h4', null, 'Question ' + entry.number + ': ' + (entry.correct ? 'Correct' : 'Incorrect')),
+          make('p', 'review-topic', 'Topic: ' + question.category),
+          make('p', 'review-prompt', question.prompt),
+          make('p', 'review-selected', 'Your answer: ' + optionText(question, entry.selected)),
+          make('p', 'review-answer', 'Correct answer: ' + optionText(question, question.answer)),
+          make('p', 'review-explanation', 'Explanation: ' + question.explanation),
+          make('p', 'review-source', 'Lesson reference: slide ' + question.sourceSlides.join(', '))
+        );
+        return item;
+      });
+      setChildren(ui.resultsReview, items);
+    }
+
+    function renderTopicList(list, entries, emptyText) {
+      if (!entries.length) {
+        setChildren(list, [make('li', 'topic-empty', emptyText)]);
+        return;
+      }
+      setChildren(list, entries.map(function (entry) {
+        return make('li', null, entry.category + ': ' + entry.correct + ' of ' + entry.total + ' correct');
+      }));
+    }
+
+    // ----- Startup -----
+
+    function readBanks() {
+      var banks = {};
+      var errors = [];
+      MODES.forEach(function (mode) {
+        var element = byId('questions-' + mode);
+        if (!element) {
+          errors.push(mode + ' bank data is missing');
+          return;
+        }
+        try {
+          banks[mode] = JSON.parse(element.textContent);
+        } catch (error) {
+          errors.push(mode + ' bank data is not valid JSON');
+        }
+      });
+      return { banks: banks, errors: errors };
+    }
+
+    function init() {
+      var loaded = readBanks();
+      var validation = validateBanks(loaded.banks);
+      state.errors = loaded.errors.concat(validation.errors);
+      state.available = state.errors.length === 0;
+
+      if (!state.available) {
+        state.banks = null;
+        ui.studyConfirm.checked = false;
+        ui.studyConfirm.disabled = true;
+        MODES.forEach(function (mode) { ui.modeButtons[mode].disabled = true; });
+        showView('unavailable');
+        ui.unavailableHeading.focus();
+        console.error('ISR Operations Mastery Quiz is unavailable: ' + state.errors.join('; '));
+        return;
+      }
+
+      state.banks = deepFreeze(loaded.banks);
+      ui.studyConfirm.addEventListener('change', function () { setStudyConfirmed(ui.studyConfirm.checked); });
+      MODES.forEach(function (mode) {
+        ui.modeButtons[mode].addEventListener('click', function () { startQuiz(mode); });
+      });
+      ui.btnCheck.addEventListener('click', checkAnswer);
+      ui.btnPrev.addEventListener('click', function () { if (state.attempt) goToQuestion(state.attempt.current - 1); });
+      ui.btnNext.addEventListener('click', function () { if (state.attempt) goToQuestion(state.attempt.current + 1); });
+      ui.btnFinish.addEventListener('click', finishQuiz);
+      ui.btnPrint.addEventListener('click', function () { window.print(); });
+      ui.btnRetake.addEventListener('click', retakeQuiz);
+      ui.btnChoose.addEventListener('click', resetToDifficulty);
+
+      showView('landing');
+      setStudyConfirmed(false);
+    }
+
+    function getState() {
+      return JSON.parse(JSON.stringify({
+        available: state.available,
+        errors: state.errors,
+        studyConfirmed: state.studyConfirmed,
+        view: state.view,
+        attempt: state.attempt,
+        results: state.results
+      }));
+    }
+
+    init();
+
+    globalThis.__artilleryQuiz = Object.freeze({
+      validateBanks: validateBanks,
+      shuffleQuestions: shuffleQuestions,
+      createAttempt: createAttempt,
+      computeResults: computeResults,
+      masteryBand: masteryBand,
+      setStudyConfirmed: setStudyConfirmed,
+      startQuiz: startQuiz,
+      selectAnswer: selectAnswer,
+      checkAnswer: checkAnswer,
+      goToQuestion: goToQuestion,
+      finishQuiz: finishQuiz,
+      retakeQuiz: retakeQuiz,
+      resetToDifficulty: resetToDifficulty,
+      getState: getState,
+      getBanks: function () { return state.banks; },
+      setRandom: function (random) { state.random = typeof random === 'function' ? random : Math.random; }
+    });
+  })();
+  </script>
+</body>
+</html>
