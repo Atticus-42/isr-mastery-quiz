@@ -409,8 +409,8 @@ function loadApp(html = builtHtml) {
   for (const script of appScripts(document)) {
     vm.runInContext(script.textContent, sandbox, { filename: 'index.html' });
   }
-  const api = sandbox.__artilleryQuiz;
-  assert.ok(api, 'index.html must expose globalThis.__artilleryQuiz');
+  const api = sandbox.__isrQuiz;
+  assert.ok(api, 'index.html must expose globalThis.__isrQuiz');
   return { document, api, printCalls, consoleErrors };
 }
 
@@ -478,7 +478,7 @@ await test('index.html is a fresh build of the template and banks', async () => 
   assert.equal(builtHtml, buildHtml(template, sourceBanks), 'run node scripts/build.mjs before verifying');
 });
 
-await test('App exposes the quiz engine through globalThis.__artilleryQuiz', () => {
+await test('App exposes the quiz engine through globalThis.__isrQuiz', () => {
   const { api } = loadApp();
   for (const name of ['validateBanks', 'shuffleQuestions', 'createAttempt', 'setStudyConfirmed', 'startQuiz', 'selectAnswer', 'checkAnswer', 'goToQuestion', 'finishQuiz', 'retakeQuiz', 'resetToDifficulty', 'masteryBand', 'getState', 'getBanks', 'setRandom']) {
     assert.equal(typeof api[name], 'function', `${name} must be exposed`);
@@ -912,7 +912,7 @@ function parseCss(css) {
 const REDUCED_MOTION_MEDIA = /prefers-reduced-motion:\s*reduce/i;
 const hasMotion = value => value !== undefined && !/^none\b/i.test(value.replace(/\s*!important$/, ''));
 
-await test('Hero artwork is an aria-hidden inline SVG with the howitzer, barrel, muzzle-flash, projectile, smoke and target-grid groups', () => {
+await test('Hero artwork is an aria-hidden inline SVG with the radar-site, radar-dish, radar-sweep, data-packet, signal-waves and command-post groups', () => {
   const document = parseHtml(builtHtml);
   const svgs = findAll(document.root, node => node.localName === 'svg');
   assert.ok(svgs.length > 0, 'index.html must contain inline SVG artwork');
@@ -922,21 +922,21 @@ await test('Hero artwork is an aria-hidden inline SVG with the howitzer, barrel,
     assert.ok(svg.getAttribute('viewbox'), 'SVG must scale through a viewBox');
   }
   const groups = {};
-  for (const id of ['howitzer', 'barrel', 'muzzle-flash', 'projectile', 'smoke', 'target-grid']) {
+  for (const id of ['radar-site', 'radar-dish', 'radar-sweep', 'data-packet', 'signal-waves', 'command-post']) {
     const node = document.getElementById(id);
     assert.ok(node, `SVG group #${id} is required`);
     assert.equal(node.localName, 'g', `#${id} must be an SVG <g> group`);
     assert.ok(svgs.some(svg => findAll(svg, child => child === node).length), `#${id} must sit inside an aria-hidden SVG`);
     groups[id] = node;
   }
-  for (const id of ['barrel', 'muzzle-flash']) {
-    assert.ok(findAll(groups.howitzer, node => node === groups[id]).length, `#${id} must be part of #howitzer`);
+  for (const id of ['radar-dish', 'radar-sweep']) {
+    assert.ok(findAll(groups['radar-site'], node => node === groups[id]).length, `#${id} must be part of #radar-site`);
   }
   const hero = document.getElementById('hero-art');
-  assert.ok(hero, 'the landing hero must contain the fire-mission art');
+  assert.ok(hero, 'the landing hero must contain the ISR art');
   assert.match(hero.textContent, /COLLECT/, 'decorative ISR labels belong inside the aria-hidden art');
-  assert.ok(findAll(hero, node => node.localName === 'path' && /\btrajectory\b/.test(node.getAttribute('class') ?? '')).length, 'a static projectile arc must be drawn');
-  assert.ok(findAll(hero, node => /\brange-rings\b/.test(node.getAttribute('class') ?? '')).length, 'range rings must be drawn');
+  assert.ok(findAll(hero, node => node.localName === 'path' && /\bdata-link\b/.test(node.getAttribute('class') ?? '')).length, 'data links from the ISR assets must be drawn');
+  assert.ok(findAll(hero, node => /\bsensor-coverage\b/.test(node.getAttribute('class') ?? '')).length, 'range rings must be drawn');
 });
 
 await test('Easy, Medium and Hard theme classes are styled and follow the active attempt', () => {
@@ -1026,7 +1026,7 @@ await test('prefers-reduced-motion: reduce sets animation and transition to none
   const stilled = new Set(reduced
     .filter(rule => /^none\b/.test(rule.declarations.get('animation') ?? '') && /^none\b/.test(rule.declarations.get('transition') ?? ''))
     .flatMap(rule => rule.selectors));
-  for (const selector of ['#barrel', '#muzzle-flash', '#projectile', '#smoke .smoke-puff', '#target-grid .target-pulse', '.view']) {
+  for (const selector of ['#radar-dish', '#radar-sweep', '#data-packet', '#signal-waves .wave', '#command-post .cp-pulse', '.view']) {
     assert.ok(stilled.has(selector), `reduced motion must set animation: none and transition: none on ${selector}`);
   }
   const moving = rules.filter(rule => !(rule.media && REDUCED_MOTION_MEDIA.test(rule.media))
@@ -1039,7 +1039,7 @@ await test('prefers-reduced-motion: reduce sets animation and transition to none
   }
   for (const rule of reduced) {
     for (const selector of rule.selectors) {
-      if (/#howitzer|#target-grid$|\.range-rings|\.trajectory|\.hero-art/.test(selector)) {
+      if (/#radar-site|#command-post$|\.sensor-coverage|\.data-link|\.hero-art/.test(selector)) {
         assert.notEqual(rule.declarations.get('display'), 'none', `static artwork ${selector} must stay visible`);
         assert.notEqual(rule.declarations.get('visibility'), 'hidden', `static artwork ${selector} must stay visible`);
       }
