@@ -5,13 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ISR Operations Mastery Quiz</title>
   <style>
-    /* ISR palette. Every text pair is WCAG AA (see Task 6 report). */
+    /* =====================================================================
+       DESIGN TOKENS. This page is the reference template for lesson quizzes.
+
+       Colour. Ratios are WCAG 2.1 contrast against --color-surface (#fbfaf3)
+       unless noted. Every text pair meets AA (4.5:1 body, 3:1 large text/UI).
+         --color-text            #1d2119  15.6:1  body copy
+         --color-muted           #464c3c   8.5:1  secondary copy, captions, dimmed options
+         --color-border          #7a8068   3.9:1  control borders (UI >= 3:1)
+         --color-border-subtle   #c3c7ae          decorative dividers only
+         --color-accent          #3f4d22   8.6:1  primary buttons (white text 9.1:1)
+         --color-focus           #1a4fd1   6.5:1  keyboard focus ring, 3px solid
+         --color-correct         #1c6530   6.8:1  (6.0:1 on --color-correct-bg, white on it 7.1:1)
+         --color-incorrect       #9e2418   7.4:1  (6.5:1 on --color-incorrect-bg, white on it 7.7:1)
+         --color-warning-text    #7a3e00   7.4:1 on --color-warning-bg
+         --color-brass           #e3b65a          hero accents on charcoal only (9.4:1 on #23281e)
+         ISR cyan                #7fc8d8          hero artwork only, never text on light surfaces
+         Difficulty accents (--mode-accent) reach >= 4.6:1 on their --mode-selected
+         tint and carry white text at >= 6:1. Difficulty is always named in text too.
+
+       Interaction states (colour is never the only signal):
+         unselected  2px --color-border, surface fill, outlined letter badge
+         hover       --mode-accent border, --mode-tint fill
+         focus       3px solid --color-focus outline, 2px offset
+         selected    --mode-accent border + inset ring, --mode-selected fill,
+                     filled letter badge, "Selected" tag with check icon
+         correct     --color-correct border + ring, --color-correct-bg fill,
+                     "Correct answer" tag with check icon
+         incorrect   --color-incorrect border + ring, --color-incorrect-bg fill,
+                     "Your answer" tag with cross icon
+         dimmed      subtle border, sunken fill, muted text (still 8:1)
+
+       Spacing:  --space-1 0.25rem · 2 0.5rem · 3 0.75rem · 4 1rem · 5 1.5rem · 6 2rem · 7 3rem
+       Type:     --text-xs 0.8125rem · sm 0.875rem · base 1rem · md 1.125rem · lg 1.375rem
+                 · xl 1.75rem · 2xl clamp(1.75rem, 1.2rem + 2vw, 2.5rem); line-height 1.5 body, 1.25 headings
+       Radii:    --radius-sm 0.375rem · md 0.5rem · lg 0.75rem · pill 999px
+       Shadows:  --shadow-sm resting cards · --shadow-md main card
+       Fonts:    system stacks only (--font-sans, --font-mono); no web fonts.
+       ===================================================================== */
     :root {
       --color-bg: #e7e8d6;
       --color-surface: #fbfaf3;
+      --color-surface-sunken: #f1f1e6;
       --color-text: #1d2119;
       --color-muted: #464c3c;
       --color-border: #7a8068;
+      --color-border-subtle: #c3c7ae;
       --color-accent: #3f4d22;
       --color-accent-hover: #2f3a19;
       --color-accent-text: #ffffff;
@@ -25,16 +64,53 @@
       --color-warning-border: #9a5a00;
       --color-warning-text: #7a3e00;
       --color-correct: #1c6530;
+      --color-correct-bg: #e3f1e4;
       --color-incorrect: #9e2418;
+      --color-incorrect-bg: #fbe6e2;
+      --color-self-bg: #fff4d1;
+      --color-self-border: #9a6a00;
       --color-focus: #1a4fd1;
+      --band-mastery: #1c6530;
+      --band-proficient: #3f4d22;
+      --band-developing: #8a5700;
+      --band-review: #9e2418;
+
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.5rem;
+      --space-6: 2rem;
+      --space-7: 3rem;
+
+      --text-xs: 0.8125rem;
+      --text-sm: 0.875rem;
+      --text-base: 1rem;
+      --text-md: 1.125rem;
+      --text-lg: 1.375rem;
+      --text-xl: 1.75rem;
+      --text-2xl: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-pill: 999px;
+
+      --shadow-sm: 0 1px 2px rgba(35, 40, 30, 0.12), 0 1px 6px rgba(35, 40, 30, 0.08);
+      --shadow-md: 0 2px 4px rgba(35, 40, 30, 0.1), 0 8px 24px rgba(35, 40, 30, 0.14);
+
+      --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      --font-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
       --mode-accent: var(--color-accent);
-      --mode-tint: var(--color-surface);
+      --mode-tint: #eef0e2;
+      --mode-selected: #e3e8cf;
       --mode-glow: var(--color-brass);
     }
     /* Difficulty identities. The difficulty is always also named in text. */
-    .theme-easy, .mode-easy { --mode-accent: #2d6a2f; --mode-tint: #eef1e3; --mode-glow: #8fd17a; }
-    .theme-medium, .mode-medium { --mode-accent: #8a5700; --mode-tint: #f7eed6; --mode-glow: #f2b441; }
-    .theme-hard, .mode-hard { --mode-accent: #a63d17; --mode-tint: #f8e6dc; --mode-glow: #ff8a5c; }
+    .theme-easy, .mode-easy { --mode-accent: #2d6a2f; --mode-tint: #eef1e3; --mode-selected: #dcebd0; --mode-glow: #8fd17a; }
+    .theme-medium, .mode-medium { --mode-accent: #8a5700; --mode-tint: #f7eed6; --mode-selected: #f5e3b8; --mode-glow: #f2b441; }
+    .theme-hard, .mode-hard { --mode-accent: #a63d17; --mode-tint: #f8e6dc; --mode-selected: #f7d9cb; --mode-glow: #ff8a5c; }
 
     *, *::before, *::after { box-sizing: border-box; }
     [hidden] { display: none !important; }
@@ -45,11 +121,26 @@
       background: var(--color-bg);
       color: var(--color-text);
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      font-size: 1rem;
+      font-size: var(--text-base);
       line-height: 1.5;
       overflow-wrap: anywhere;
     }
     h1, h2, h3, h4 { line-height: 1.25; }
+    h2 { font-size: var(--text-lg); margin: var(--space-6) 0 var(--space-3); }
+    h3 { font-size: var(--text-md); margin: var(--space-5) 0 var(--space-3); }
+    h4 { font-size: var(--text-base); margin: var(--space-4) 0 var(--space-2); }
+    p { margin: 0 0 var(--space-3); }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
 
     /* Decorative tactical-map layer: fixed, clipped and inert, so it never adds page width. */
     .terrain {
@@ -74,22 +165,42 @@
     .hero-inner {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-      gap: 1.5rem;
+      gap: var(--space-5);
       align-items: center;
       width: 100%;
       max-width: 72rem;
       margin: 0 auto;
-      padding: 1.5rem 1rem;
+      padding: var(--space-5) var(--space-4);
     }
     .hero-copy { min-width: 0; }
-    .eyebrow { margin: 0; font-weight: 700; letter-spacing: 0.04em; color: var(--color-brass); }
-    h1 { margin: 0.25rem 0 0.5rem; font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem); }
+    .eyebrow { margin: 0; font-size: var(--text-sm); font-weight: 700; letter-spacing: 0.04em; color: var(--color-brass); }
+    h1 { margin: var(--space-1) 0 var(--space-2); font-size: var(--text-2xl); }
     .hero-lede { margin: 0; color: var(--color-hero-muted); max-width: 34rem; }
+    .hero-tools { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
     .hero-art { min-width: 0; }
     .hero-art svg { display: block; width: 100%; max-width: 100%; height: auto; }
-    .hero-art text { font-family: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; }
-    body[data-view="quiz"] .hero-inner, body[data-view="results"] .hero-inner { padding-top: 1rem; padding-bottom: 1rem; }
+    .hero-art text { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; }
+    body[data-view="quiz"] .hero-inner, body[data-view="results"] .hero-inner { padding-top: var(--space-4); padding-bottom: var(--space-4); }
     body[data-view="quiz"] .hero-art svg, body[data-view="results"] .hero-art svg { max-height: 12rem; }
+
+    /* Sound toggle: speaker icon plus visible On/Off text; aria-pressed carries the state. */
+    .sound-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      border: 2px solid var(--color-brass);
+      background: rgba(20, 24, 17, 0.55);
+      color: var(--color-hero-text);
+      font-size: var(--text-sm);
+    }
+    .sound-toggle:hover:not(:disabled) { background: rgba(20, 24, 17, 0.85); border-color: var(--color-hero-text); }
+    .sound-toggle svg { width: 1.25rem; height: 1.25rem; flex: none; }
+    .sound-toggle .sound-waves { display: inline; }
+    .sound-toggle .sound-mute { display: none; }
+    .sound-toggle[aria-pressed="false"] .sound-waves { display: none; }
+    .sound-toggle[aria-pressed="false"] .sound-mute { display: inline; }
+    .sound-state { font-weight: 700; color: var(--color-brass); }
 
     /* Artwork parts. Rest states are the static artwork shown with reduced motion. */
     #command-post { color: var(--mode-glow); }
@@ -144,13 +255,13 @@
     .app {
       width: calc(100% - 2rem);
       max-width: 52rem;
-      margin: 1.5rem auto 2rem;
-      padding: 1.25rem;
+      margin: var(--space-5) auto var(--space-6);
+      padding: var(--space-5);
       background: var(--color-surface);
       border: 1px solid var(--color-border);
       border-top: 6px solid var(--mode-accent);
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 10px rgba(35, 40, 30, 0.18);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
     }
     .view { animation: view-enter 0.3s ease-out both; }
     .view > h2:first-child { margin-top: 0; }
@@ -159,116 +270,309 @@
       font: inherit;
       min-height: 44px;
       min-width: 44px;
-      padding: 0.625rem 1rem;
+      padding: var(--space-3) var(--space-4);
       border: 2px solid var(--color-accent);
-      border-radius: 0.375rem;
+      border-radius: var(--radius-sm);
       background: var(--color-accent);
       color: var(--color-accent-text);
       font-weight: 600;
+      line-height: 1.25;
       cursor: pointer;
-      transition: background-color 0.15s ease, border-color 0.15s ease;
+      transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     }
     button:hover:not(:disabled) { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
     button.secondary { background: var(--color-surface); color: var(--color-accent); }
-    button.secondary:hover:not(:disabled) { background: #eef0e2; color: var(--color-accent-hover); }
-    button:disabled { cursor: not-allowed; opacity: 0.5; }
+    button.secondary:hover:not(:disabled) { background: var(--mode-tint); color: var(--color-accent-hover); }
+    button.compact { padding: var(--space-2) var(--space-3); font-size: var(--text-sm); }
+    button:disabled { cursor: not-allowed; opacity: 0.55; }
     :focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+    .hero :focus-visible { outline-color: #ffffff; }
+
+    /* Icons are drawn in CSS with currentColor, always paired with text. */
+    .icon { position: relative; display: inline-block; flex: none; width: 1em; height: 1em; vertical-align: -0.125em; }
+    .icon::before, .icon::after { content: ""; position: absolute; }
+    .icon-check::before { left: 0.32em; top: 0.06em; width: 0.34em; height: 0.64em; border: solid currentColor; border-width: 0 0.16em 0.16em 0; transform: rotate(45deg); }
+    .icon-cross::before, .icon-cross::after { left: 0.42em; top: 0.02em; width: 0.16em; height: 0.96em; border-radius: 0.08em; background: currentColor; transform: rotate(45deg); }
+    .icon-cross::after { transform: rotate(-45deg); }
+    .icon-alert::before { left: 0.42em; top: 0.04em; width: 0.16em; height: 0.6em; border-radius: 0.08em; background: currentColor; }
+    .icon-alert::after { left: 0.42em; top: 0.78em; width: 0.16em; height: 0.18em; border-radius: 0.08em; background: currentColor; }
+    .icon-dot::before { left: 0.3em; top: 0.3em; width: 0.4em; height: 0.4em; border-radius: 50%; background: currentColor; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.125rem 0.625rem;
+      border-radius: var(--radius-pill);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      line-height: 1.5;
+      white-space: nowrap;
+    }
+    .tag-selected { background: var(--mode-accent); color: #ffffff; }
+    .tag-correct { background: var(--color-correct); color: #ffffff; }
+    .tag-incorrect { background: var(--color-incorrect); color: #ffffff; }
+    .tag-strength { background: var(--color-correct-bg); color: var(--color-correct); border: 1px solid var(--color-correct); }
+    .tag-gap { background: var(--color-incorrect-bg); color: var(--color-incorrect); border: 1px solid var(--color-incorrect); }
+    .tag-you { background: var(--color-accent); color: #ffffff; font-size: var(--text-xs); padding: 0 var(--space-2); }
+
+    /* Landing */
+    .field { margin: 0 0 var(--space-5); }
+    .field-label { display: block; margin-bottom: var(--space-1); font-weight: 700; }
+    .field-help { margin: 0 0 var(--space-2); font-size: var(--text-sm); color: var(--color-muted); }
+    .text-input {
+      display: block;
+      width: 100%;
+      max-width: 26rem;
+      min-height: 44px;
+      padding: var(--space-2) var(--space-3);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: #ffffff;
+      color: var(--color-text);
+      font: inherit;
+      transition: border-color 0.15s ease;
+    }
+    .text-input:hover { border-color: var(--color-accent); }
+    .text-input[aria-invalid="true"] { border-color: var(--color-incorrect); }
+    .field-message { display: flex; gap: var(--space-2); align-items: baseline; margin: var(--space-2) 0 0; color: var(--color-incorrect); font-weight: 600; }
 
     .study-warning {
       border: 2px solid var(--color-warning-border);
       border-left-width: 8px;
-      border-radius: 0.5rem;
+      border-radius: var(--radius-md);
       background: var(--color-warning-bg);
-      padding: 1rem;
+      padding: var(--space-4);
     }
     .study-warning p { margin-top: 0; }
     .study-warning strong { color: var(--color-warning-text); }
     .study-confirm {
       display: flex;
-      gap: 0.75rem;
+      gap: var(--space-3);
       align-items: flex-start;
       min-height: 44px;
-      padding: 0.5rem 0;
+      padding: var(--space-2) 0;
       font-weight: 600;
       cursor: pointer;
     }
     .study-confirm input { flex: none; width: 1.5rem; height: 1.5rem; margin: 0.1rem 0 0; accent-color: var(--color-accent); }
 
+    .mode-hint { color: var(--color-muted); }
     .mode-list {
       display: grid;
-      gap: 0.75rem;
+      gap: var(--space-3);
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
     }
     .mode-button {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.25rem;
+      gap: var(--space-1);
       text-align: left;
+      padding: var(--space-4);
       background: var(--mode-tint);
       color: var(--color-text);
       border: 2px solid var(--color-border);
       border-left: 10px solid var(--mode-accent);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
     }
     .mode-button:hover:not(:disabled) { background: var(--color-surface); border-color: var(--mode-accent); color: var(--color-text); }
-    .mode-name { font-size: 1.125rem; font-weight: 700; color: var(--mode-accent); }
+    .mode-name { font-size: var(--text-md); font-weight: 700; color: var(--mode-accent); }
     .mode-desc { font-size: 0.9375rem; font-weight: 400; }
     .privacy-note, .question-category, .results-reminder { color: var(--color-muted); }
+    .privacy-note { margin-top: var(--space-5); font-size: var(--text-sm); }
 
-    progress { width: 100%; height: 0.75rem; accent-color: var(--mode-accent); }
+    /* Quiz */
+    .quiz-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-4); margin-bottom: var(--space-3); }
+    .quiz-head h2 { margin: 0; }
+    .student-line { margin: 0; font-size: var(--text-sm); color: var(--color-muted); }
+    .student-line strong { color: var(--color-text); }
+    .quiz-progress label { font-size: var(--text-sm); font-weight: 600; color: var(--color-muted); }
+    .quiz-status { font-size: var(--text-sm); color: var(--color-muted); }
+    progress { display: block; width: 100%; height: 0.75rem; accent-color: var(--mode-accent); }
+    .question-heading { margin: var(--space-5) 0 var(--space-1); }
+    .question-category { margin: 0 0 var(--space-4); font-size: var(--text-sm); }
     fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
-    legend { display: block; max-width: 100%; margin-bottom: 0.75rem; padding: 0; font-size: 1.125rem; font-weight: 600; white-space: normal; }
+    legend { display: block; max-width: 100%; margin-bottom: var(--space-4); padding: 0; font-size: var(--text-md); font-weight: 600; line-height: 1.45; white-space: normal; }
+
     .option {
+      position: relative;
       display: flex;
-      gap: 0.75rem;
+      gap: var(--space-3);
       align-items: flex-start;
       min-height: 44px;
-      margin-bottom: 0.5rem;
-      padding: 0.75rem;
+      margin-bottom: var(--space-2);
+      padding: var(--space-3) var(--space-4) var(--space-3) var(--space-3);
       border: 2px solid var(--color-border);
-      border-radius: 0.5rem;
+      border-radius: var(--radius-md);
       background: var(--color-surface);
       cursor: pointer;
-      transition: border-color 0.15s ease, background-color 0.15s ease;
+      transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .option:hover:not(.option-correct):not(.option-incorrect) { border-color: var(--mode-accent); background: var(--mode-tint); }
-    .option input { flex: none; width: 1.25rem; height: 1.25rem; margin: 0.15rem 0 0; accent-color: var(--mode-accent); }
-    .option-body { min-width: 0; }
-    .option-letter { font-weight: 700; }
-    .option-tag { display: block; font-size: 0.875rem; font-weight: 700; }
-    .option-correct { border-color: var(--color-correct); border-width: 3px; }
-    .option-correct .option-tag { color: var(--color-correct); }
-    .option-incorrect { border-color: var(--color-incorrect); border-width: 3px; border-style: dashed; }
-    .option-incorrect .option-tag { color: var(--color-incorrect); }
-    .validation-message { color: var(--color-incorrect); font-weight: 600; }
-    .feedback { margin-top: 1rem; padding: 0.75rem 1rem; border-left: 6px solid var(--color-border); background: var(--mode-tint); animation: view-enter 0.25s ease-out both; }
-    .feedback p { margin: 0.25rem 0; }
-    .feedback-correct { border-left-color: var(--color-correct); }
-    .feedback-incorrect { border-left-color: var(--color-incorrect); }
-    .quiz-actions, .results-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+    /* The native radio stays in the tab order and drives keyboard selection; the letter badge is its visual. */
+    .option input { position: absolute; top: 50%; left: 1.25rem; width: 1px; height: 1px; margin: 0; opacity: 0; }
+    .option-letter {
+      display: inline-flex;
+      flex: none;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border: 2px solid var(--color-border);
+      border-radius: 50%;
+      background: var(--color-surface);
+      color: var(--color-text);
+      font-weight: 700;
+    }
+    .option-body { flex: 1; min-width: 0; padding-top: 0.2rem; }
+    .option-text { display: block; }
+    .option-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+    .option-tags:empty { display: none; }
+    .option:hover:not(.option-correct):not(.option-incorrect):not(.option-selected):not(.option-locked) { border-color: var(--mode-accent); background: var(--mode-tint); }
+    .option:focus-within { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+    .option:has(input:focus:not(:focus-visible)) { outline-color: transparent; }
+    .option-selected { border-color: var(--mode-accent); background: var(--mode-selected); box-shadow: inset 0 0 0 1px var(--mode-accent); }
+    .option-selected .option-letter { border-color: var(--mode-accent); background: var(--mode-accent); color: #ffffff; }
+    .option-locked { cursor: default; }
+    .option-correct { border-color: var(--color-correct); background: var(--color-correct-bg); box-shadow: inset 0 0 0 1px var(--color-correct); }
+    .option-correct .option-letter { border-color: var(--color-correct); background: var(--color-correct); color: #ffffff; }
+    .option-incorrect { border-color: var(--color-incorrect); background: var(--color-incorrect-bg); box-shadow: inset 0 0 0 1px var(--color-incorrect); }
+    .option-incorrect .option-letter { border-color: var(--color-incorrect); background: var(--color-incorrect); color: #ffffff; }
+    .option-dimmed { border-color: var(--color-border-subtle); background: var(--color-surface-sunken); color: var(--color-muted); }
+    .option-dimmed .option-letter { border-color: var(--color-border-subtle); background: var(--color-surface-sunken); color: var(--color-muted); }
+
+    .validation-message { display: flex; gap: var(--space-2); align-items: baseline; margin-top: var(--space-3); color: var(--color-incorrect); font-weight: 600; }
+
+    .feedback {
+      margin-top: var(--space-5);
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      animation: view-enter 0.25s ease-out both;
+    }
+    .feedback-correct { border-color: var(--color-correct); }
+    .feedback-incorrect { border-color: var(--color-incorrect); }
+    .feedback-header { display: flex; align-items: center; gap: var(--space-3); margin: 0; padding: var(--space-3) var(--space-4); font-size: var(--text-lg); font-weight: 700; }
+    .feedback-correct .feedback-header { background: var(--color-correct-bg); color: var(--color-correct); }
+    .feedback-incorrect .feedback-header { background: var(--color-incorrect-bg); color: var(--color-incorrect); }
+    .feedback-mark { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 50%; color: #ffffff; font-size: 1rem; }
+    .feedback-correct .feedback-mark { background: var(--color-correct); }
+    .feedback-incorrect .feedback-mark { background: var(--color-incorrect); }
+    .feedback-body { padding: var(--space-4); }
+    .answer-line { margin: 0 0 var(--space-2); padding: var(--space-2) var(--space-3); border-left: 4px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-sunken); }
+    .answer-line-correct { border-left-color: var(--color-correct); background: var(--color-correct-bg); }
+    .answer-line-incorrect { border-left-color: var(--color-incorrect); background: var(--color-incorrect-bg); }
+    .answer-label { font-weight: 700; }
+    .explanation { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border-subtle); }
+    .section-label { margin: 0 0 var(--space-1); font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); }
+    .explanation-text { margin: 0; max-width: 68ch; line-height: 1.6; }
+    .source-ref { margin: var(--space-3) 0 0; font-size: var(--text-sm); color: var(--color-muted); }
+    .quiz-actions, .results-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-5); }
+
+    /* Results */
+    .score-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: var(--space-5);
+      align-items: center;
+      padding: var(--space-5);
+      border: 1px solid var(--color-border);
+      border-left: 8px solid var(--band-color, var(--mode-accent));
+      border-radius: var(--radius-lg);
+      background: var(--mode-tint);
+      box-shadow: var(--shadow-sm);
+    }
+    .band-mastery { --band-color: var(--band-mastery); }
+    .band-proficient { --band-color: var(--band-proficient); }
+    .band-developing { --band-color: var(--band-developing); }
+    .band-needs-review { --band-color: var(--band-review); }
+    .score-figure { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 8.5rem; height: 8.5rem; border: 6px solid var(--band-color, var(--mode-accent)); border-radius: 50%; background: var(--color-surface); text-align: center; }
+    .score-percent { font-size: 2.25rem; font-weight: 800; line-height: 1; }
+    .score-count { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--color-muted); }
+    .score-meta { min-width: 0; }
+    .score-meta p { margin: 0 0 var(--space-2); }
+    .meta-label { display: block; font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-muted); }
+    .meta-value { font-weight: 700; }
+    .band-badge { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--band-color, var(--mode-accent)); color: #ffffff; font-size: var(--text-md); font-weight: 700; }
+    .band-description { color: var(--color-text); }
+
+    .history-save { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin-top: var(--space-4); padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); background: var(--color-surface-sunken); font-size: var(--text-sm); }
+    .history-save p { display: flex; gap: var(--space-2); align-items: baseline; margin: 0; }
+    .history-save:empty { display: none; }
+    .save-failed { border-color: var(--color-incorrect); background: var(--color-incorrect-bg); color: var(--color-incorrect); font-weight: 600; }
+    .save-saved { border-color: var(--color-correct); background: var(--color-correct-bg); color: var(--color-correct); font-weight: 600; }
+    .results-reminder { margin-top: var(--space-4); font-size: var(--text-sm); }
+
     .table-wrap { max-width: 100%; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; background: var(--color-surface); }
-    caption { text-align: left; padding-bottom: 0.5rem; }
-    th, td { padding: 0.5rem; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: top; }
-    .review-list { padding-left: 1.25rem; }
-    .review-item { margin-bottom: 1.25rem; }
-    .review-item p { margin: 0.25rem 0; }
+    caption { text-align: left; padding-bottom: var(--space-2); color: var(--color-muted); font-size: var(--text-sm); }
+    th, td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border-subtle); text-align: left; vertical-align: middle; }
+    thead th { border-bottom: 2px solid var(--color-border); font-size: var(--text-sm); color: var(--color-muted); }
+    .topic-count { min-width: 9rem; }
+    .bar { position: relative; display: block; height: 0.5rem; margin-top: var(--space-1); border-radius: var(--radius-pill); background: var(--color-border-subtle); overflow: hidden; }
+    .bar::after { content: ""; position: absolute; top: 0; bottom: 0; left: 75%; width: 2px; background: var(--color-text); }
+    .bar-fill { display: block; height: 100%; border-radius: var(--radius-pill); }
+    .bar-strength { background: var(--color-correct); }
+    .bar-gap { background: var(--color-incorrect); }
+    .topic-lists { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+    .topic-lists ul { margin: 0; padding-left: var(--space-5); }
+
+    .review-list { margin: 0; padding: 0; list-style: none; }
+    .review-item { margin-bottom: var(--space-4); padding: var(--space-4); border: 1px solid var(--color-border-subtle); border-left: 6px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+    .review-correct { border-left-color: var(--color-correct); }
+    .review-incorrect { border-left-color: var(--color-incorrect); }
+    .review-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin: 0 0 var(--space-2); }
+    .review-topic { font-size: var(--text-sm); color: var(--color-muted); }
+    .review-prompt { font-weight: 600; }
+
+    /* Class score history */
+    .history-panel { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 2px solid var(--color-border-subtle); }
+    .section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); }
+    .section-head h2 { margin: 0; }
+    .section-intro { margin-top: var(--space-2); color: var(--color-muted); font-size: var(--text-sm); }
+    .history-filters { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
+    .filter-button { background: var(--color-surface); color: var(--color-accent); padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); }
+    .filter-button:hover:not(:disabled) { background: var(--mode-tint); color: var(--color-accent-hover); }
+    .filter-button[aria-pressed="true"], .filter-button[aria-pressed="true"]:hover:not(:disabled) { background: var(--color-accent); color: #ffffff; }
+    .history-status { display: flex; gap: var(--space-2); align-items: baseline; padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-surface-sunken); }
+    .status-error { background: var(--color-incorrect-bg); color: var(--color-incorrect); font-weight: 600; }
+    .status-not-configured { background: var(--color-warning-bg); color: var(--color-warning-text); }
+    .status-ready { padding: 0; background: transparent; color: var(--color-muted); font-size: var(--text-sm); }
+    .history-table td { font-variant-numeric: tabular-nums; }
+    .history-row-self td { background: var(--color-self-bg); }
+    .history-row-self td:first-child { box-shadow: inset 4px 0 0 var(--color-self-border); }
+    .history-name-text { font-weight: 600; }
 
     /* Narrow screens: stack the hero and every control row. */
     @media (max-width: 760px) {
-      .hero-inner { grid-template-columns: 1fr; gap: 0.75rem; padding: 1rem; }
+      .hero-inner { grid-template-columns: 1fr; gap: var(--space-3); padding: var(--space-4); }
       .hero-art svg { max-height: 13rem; margin: 0 auto; }
       body[data-view="quiz"] .hero-art, body[data-view="results"] .hero-art, body[data-view="quiz"] .hero-lede, body[data-view="results"] .hero-lede { display: none; }
-      .app { width: calc(100% - 1rem); margin: 0.75rem auto 1.5rem; padding: 1rem; }
+      .hero-tools { margin-top: var(--space-3); }
+      .app { width: calc(100% - 1rem); margin: var(--space-3) auto var(--space-5); padding: var(--space-4); }
       .mode-list { grid-template-columns: 1fr; }
       .quiz-actions, .results-actions { flex-direction: column; }
       .quiz-actions button, .results-actions button { width: 100%; }
-      th, td { padding: 0.375rem; }
+      .score-card { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: var(--space-4); }
+      th, td { padding: var(--space-2); }
+    }
+    /* Very narrow screens: history rows become labelled cards so the page never scrolls sideways. */
+    @media (max-width: 560px) {
+      .history-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .history-table, .history-table tbody, .history-table tr, .history-table td { display: block; width: 100%; }
+      .history-table tr { margin-bottom: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); }
+      .history-table td { display: flex; justify-content: space-between; gap: var(--space-3); padding: var(--space-1) 0; border: 0; }
+      .history-table td::before { content: attr(data-label); font-weight: 700; color: var(--color-muted); }
+      .history-row-self { border-color: var(--color-self-border); background: var(--color-self-bg); }
+      .history-row-self td:first-child { box-shadow: none; }
     }
 
     /* Reduced motion: stop every animation and transition; the static artwork stays visible. */
     @media (prefers-reduced-motion: reduce) {
-      #radar-dish, #radar-sweep, #data-packet, #signal-waves .wave, #signal-waves .wave:nth-child(2), #signal-waves .wave:nth-child(3), #command-post .cp-pulse, .view, .feedback, button, .option {
+      #radar-dish, #radar-sweep, #data-packet, #signal-waves .wave, #signal-waves .wave:nth-child(2), #signal-waves .wave:nth-child(3), #command-post .cp-pulse, .view, .feedback, button, .option, .text-input {
         animation: none !important;
         transition: none !important;
       }
@@ -279,10 +583,11 @@
 
     @media print {
       body { background: #ffffff; }
-      .terrain, .hero-art, .results-actions, .noscript { display: none !important; }
+      .terrain, .hero-art, .hero-tools, .results-actions, .noscript, .history-panel, .history-save { display: none !important; }
       .hero { background: #ffffff; color: #000000; border-bottom: 2px solid #000000; }
       .eyebrow, .hero-lede { color: #000000; }
       .app { box-shadow: none; border: 0; margin: 0 auto; }
+      .review-item { break-inside: avoid; }
     }
   </style>
 </head>
@@ -316,6 +621,17 @@
         <p class="eyebrow">Philippine Army · Intelligence, Surveillance and Reconnaissance</p>
         <h1>ISR Operations Mastery Quiz</h1>
         <p class="hero-lede">A practice aid for the Introduction to ISR Operations lesson: 75 situational questions across Easy, Medium, and Hard.</p>
+        <div class="hero-tools">
+          <button type="button" id="btn-sound" class="sound-toggle" aria-pressed="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/>
+              <path class="sound-waves" d="M15.5 9a4.2 4.2 0 0 1 0 6M18.2 6.5a8 8 0 0 1 0 11"/>
+              <path class="sound-mute" d="M16 9.5l5 5M21 9.5l-5 5"/>
+            </svg>
+            <span>Sound effects</span>
+            <span id="sound-state" class="sound-state" aria-hidden="true">On</span>
+          </button>
+        </div>
       </div>
       <div id="hero-art" class="hero-art" aria-hidden="true">
         <svg viewBox="0 0 480 250" aria-hidden="true" focusable="false">
@@ -356,8 +672,15 @@
             <path class="data-link" d="M300 200L392 186"/>
           </g>
           <g id="command-post">
-            <rect x="386" y="150" width="46" height="40" rx="4" fill="#2a2f24" stroke="currentColor" stroke-width="2"/>
-            <path d="M394 160H424M394 170H418M394 180H422" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M380 190H440" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M393 159V148" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M388 151Q393 146 398 151M385.5 147.5Q393 140 400.5 147.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="393" cy="148" r="1.6" fill="currentColor"/>
+            <path d="M386 189L398 164H420L432 189Z" fill="#2a2f24" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M398 164L409 189M420 164L409 189" stroke="currentColor" stroke-opacity="0.45" stroke-width="1"/>
+            <path d="M403 189L409 176L415 189Z" fill="currentColor"/>
+            <path d="M409 164V136" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M409 137L427 142L409 147Z" fill="currentColor"/>
             <circle class="cp-pulse" cx="409" cy="170" r="16" fill="none" stroke="currentColor" stroke-width="2.5"/>
             <text x="376" y="204" fill="currentColor">COMMANDER</text>
           </g>
@@ -394,6 +717,12 @@
 
     <section id="view-landing" class="view view-landing" aria-labelledby="landing-heading">
       <h2 id="landing-heading">Before you begin</h2>
+      <div class="field">
+        <label class="field-label" for="student-name">Your name or username</label>
+        <p id="student-name-help" class="field-help">2 to 40 characters. Shown on your results and in the class score history.</p>
+        <input type="text" id="student-name" class="text-input" name="student-name" autocomplete="name" maxlength="40" spellcheck="false" required aria-describedby="student-name-help student-name-message">
+        <p id="student-name-message" class="field-message" aria-live="polite" hidden></p>
+      </div>
       <div id="study-warning" class="study-warning">
         <p><strong>This mock examination is a practice aid only.</strong> It cannot replace studying the complete Introduction to ISR Operations lesson, and repeated attempts are not a substitute for that study.</p>
         <label class="study-confirm" for="study-confirm">
@@ -403,7 +732,7 @@
       </div>
 
       <h2 id="difficulty-heading" tabindex="-1">Choose a difficulty</h2>
-      <p id="mode-hint" class="mode-hint" role="status" aria-live="polite">Check the study confirmation above to enable the difficulty buttons.</p>
+      <p id="mode-hint" class="mode-hint" role="status" aria-live="polite">To enable the difficulty buttons, enter your name and check the study confirmation above.</p>
       <div id="mode-list" class="mode-list" role="group" aria-labelledby="difficulty-heading">
         <button type="button" id="mode-easy" class="mode-button mode-easy" disabled aria-describedby="mode-hint">
           <span class="mode-name">Easy</span>
@@ -418,11 +747,14 @@
           <span class="mode-desc">25 questions. Integrate several concepts under competing constraints.</span>
         </button>
       </div>
-      <p class="privacy-note">No login and no tracking. Your answers stay in this browser tab and are cleared when you refresh or close it.</p>
+      <p class="privacy-note">No login and no tracking. Your answers stay in this browser tab and are cleared when you refresh or close it. When your instructor has set up the class history, finishing an attempt sends your name, difficulty, score, percentage, mastery band and finish time to the class history sheet. Your individual answers are never sent.</p>
     </section>
 
     <section id="view-quiz" class="view view-quiz" hidden aria-labelledby="quiz-heading">
-      <h2 id="quiz-heading">Examination</h2>
+      <div class="quiz-head">
+        <h2 id="quiz-heading">Examination</h2>
+        <p id="quiz-student" class="student-line"></p>
+      </div>
       <div class="quiz-progress">
         <label for="quiz-progress">Answers checked</label>
         <progress id="quiz-progress" max="25" value="0"></progress>
@@ -444,27 +776,38 @@
     <section id="view-results" class="view view-results" hidden aria-labelledby="results-heading">
       <h2 id="results-heading" tabindex="-1">Results</h2>
       <div id="results-summary" class="results-summary"></div>
+      <div id="history-save" class="history-save">
+        <p id="history-save-message" role="status" aria-live="polite"></p>
+        <button type="button" id="btn-history-retry" class="secondary compact" hidden>Retry saving</button>
+      </div>
       <p class="results-reminder">This score is practice feedback only. Study the complete lesson; do not rely only on this mock examination.</p>
       <div class="results-actions">
         <button type="button" id="btn-print" class="secondary">Print or save results</button>
         <button type="button" id="btn-retake">Retake same difficulty</button>
         <button type="button" id="btn-choose" class="secondary">Choose another difficulty</button>
+        <button type="button" id="btn-history" class="secondary">View class score history</button>
       </div>
       <section class="results-topics" aria-labelledby="topics-heading">
         <h3 id="topics-heading">Topic analysis</h3>
         <div class="table-wrap">
-          <table id="results-categories">
-            <caption>Correct answers by primary topic. A topic is a strength at 75% or higher and a gap below 75%.</caption>
+          <table id="results-categories" class="topic-table">
+            <caption>Correct answers by primary topic. A topic is a strength at 75% or higher and a gap below 75%; the line on each bar marks 75%.</caption>
             <thead>
               <tr><th scope="col">Topic</th><th scope="col">Correct</th><th scope="col">Result</th></tr>
             </thead>
             <tbody id="results-categories-body"></tbody>
           </table>
         </div>
-        <h4>Strengths</h4>
-        <ul id="results-strengths" class="results-strengths"></ul>
-        <h4>Gaps to review in the lesson</h4>
-        <ul id="results-gaps" class="results-gaps"></ul>
+        <div class="topic-lists">
+          <div>
+            <h4>Strengths</h4>
+            <ul id="results-strengths" class="results-strengths"></ul>
+          </div>
+          <div>
+            <h4>Gaps to review in the lesson</h4>
+            <ul id="results-gaps" class="results-gaps"></ul>
+          </div>
+        </div>
       </section>
       <section class="results-review" aria-labelledby="review-heading">
         <h3 id="review-heading">Full answer review</h3>
@@ -476,6 +819,30 @@
       <h2 id="unavailable-heading" tabindex="-1">Quiz unavailable</h2>
       <p>The quiz is unavailable because its question data could not be loaded or did not pass validation, so no examination can start. Please try again later or inform your instructor.</p>
     </section>
+
+    <section id="history-panel" class="history-panel" aria-labelledby="history-heading" hidden>
+      <div class="section-head">
+        <h2 id="history-heading" tabindex="-1">Class score history</h2>
+        <button type="button" id="btn-history-refresh" class="secondary compact">Refresh</button>
+      </div>
+      <p class="section-intro">Recent attempts from your class, newest first. Rows with your name are marked “You”.</p>
+      <div class="history-filters" role="group" aria-label="Show attempts for">
+        <button type="button" id="history-filter-all" class="filter-button" aria-pressed="true">All</button>
+        <button type="button" id="history-filter-easy" class="filter-button" aria-pressed="false">Easy</button>
+        <button type="button" id="history-filter-medium" class="filter-button" aria-pressed="false">Medium</button>
+        <button type="button" id="history-filter-hard" class="filter-button" aria-pressed="false">Hard</button>
+      </div>
+      <p id="history-status" class="history-status" role="status" aria-live="polite"></p>
+      <div id="history-table-wrap" class="table-wrap" hidden>
+        <table id="history-table" class="history-table">
+          <caption class="sr-only">Recent class attempts, newest first</caption>
+          <thead>
+            <tr><th scope="col">Name</th><th scope="col">Mode</th><th scope="col">Score</th><th scope="col">%</th><th scope="col">Band</th><th scope="col">Date</th></tr>
+          </thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <script type="application/json" id="questions-easy">[{"id":1,"difficulty":"easy","category":"ISR Fundamentals and Components","tags":["surveillance"],"prompt":"A Philippine Army company posts a team to watch one bridge without interruption and log every crossing. Which ISR component is this activity?","options":["Surveillance","Reconnaissance","Intelligence","Dissemination"],"answer":0,"explanation":"Slide 26 defines surveillance as the continuous observation of a target.","sourceSlides":[26]},{"id":2,"difficulty":"easy","category":"ISR Fundamentals and Components","tags":["reconnaissance"],"prompt":"A patrol is sent to collect data that answers one specific commander question: can trucks use a jungle road? Which ISR component does this describe?","options":["Reconnaissance","Surveillance","Intelligence","Persistence"],"answer":0,"explanation":"Slide 26 defines reconnaissance as collecting data to address a specific military question.","sourceSlides":[26]},{"id":3,"difficulty":"easy","category":"ISR Fundamentals and Components","tags":["intelligence"],"prompt":"A Philippine Army battalion S2 merges a week of observation logs on a barangay and a patrol report on a river ford with other available reporting into one assessment for the commander. Which ISR component is the S2 producing?","options":["Intelligence","Surveillance","Reconnaissance","A collection plan"],"answer":0,"explanation":"Slide 26 defines intelligence as the result of surveillance and reconnaissance combined with other data; the S2's merged product is intelligence.","sourceSlides":[26]},{"id":4,"difficulty":"easy","category":"Roles and Importance of ISR","tags":["role of ISR","decision-making"],"prompt":"Before deciding whether to push a rifle company toward a suspected enemy camp, a Philippine Army brigade commander asks the S2 for the latest ISR picture. What is ISR contributing in this situation?","options":["It replaces the commander's planning with automated orders","It limits intelligence to areas held by friendly forces","It spares the unit from assessing combat effectiveness","It gives the commander information that aids the decision"],"answer":3,"explanation":"Slide 28 says ISR aims to provide information to commanders to aid in decision-making.","sourceSlides":[28]},{"id":5,"difficulty":"easy","category":"Roles and Importance of ISR","tags":["evaluate combat effectiveness"],"prompt":"After a training strike, the staff uses ISR to judge how well the strike worked. Which stated ISR aim is being served?","options":["Evaluating combat effectiveness","Supporting deception techniques","Alerting friendly forces to threats","Defining the operational environment"],"answer":0,"explanation":"Slide 28 lists evaluating combat effectiveness as an ISR aim.","sourceSlides":[28]},{"id":6,"difficulty":"easy","category":"Roles and Importance of ISR","tags":["ISR systems","unstructured data"],"prompt":"A Philippine Army squad leader says his team's handheld mobile devices cannot contribute to ISR because 'real ISR comes only from large satellites.' Which point best corrects him?","options":["ISR systems are limited to manned aircraft crews","ISR systems range in size from mobile devices to satellites","ISR systems can process structured records only","ISR systems are useful only in the air domain"],"answer":1,"explanation":"Slide 29 says ISR systems range in size from mobile devices to satellites, so small devices can be ISR systems.","sourceSlides":[29]},{"id":7,"difficulty":"easy","category":"Airborne ISR Systems","tags":["HALE"],"prompt":"A Philippine Army division planner needs an airborne platform that can stay over a wide mountainous area of operations at very high altitude for many hours without pilot limitations cutting the mission short. Which platform best fits?","options":["A manned reconnaissance aircraft","A ground surveillance radar","A submarine","A high-altitude, long-endurance (HALE) vehicle"],"answer":3,"explanation":"Slide 36 says a HALE vehicle can operate extremely high for many hours since the pilot has no limitations.","sourceSlides":[36]},{"id":8,"difficulty":"easy","category":"Airborne ISR Systems","tags":["UAV","strike capability"],"prompt":"ISR has identified an armed group's boat landing site on a coast, and a Philippine Army task force wants an airborne asset that can stay available and engage it. What does a UAV carrying precision-guided ammunition offer here?","options":["Signals collection from a regular orbit over the coast","Flexible, persistent strike against the ISR-identified target","Concealed collection from beneath the sea near the site","Fixed observation from a low tower on the shoreline"],"answer":1,"explanation":"Slide 32 says UAVs carrying missiles, bombs or precision-guided ammunition to engage targets identified through ISR provide a flexible and persistent strike capability supporting ground or maritime operations.","sourceSlides":[32]},{"id":9,"difficulty":"easy","category":"Airborne ISR Systems","tags":["manned reconnaissance aircraft"],"prompt":"In a Philippine Army staff exercise, a trainee proposes dropping manned reconnaissance aircraft from the ISR plan because they are 'an untried new idea.' Which correction applies?","options":["It is the newest approach, developed after HALE vehicles","It is the traditional aerial approach, used since World War I","It began with satellites and was later adapted to aircraft","It is limited to maritime patrol missions over open sea"],"answer":1,"explanation":"Slide 35 calls manned reconnaissance aircraft the more traditional approach to aerial ISR, used since World War I.","sourceSlides":[35]},{"id":10,"difficulty":"easy","category":"Ground-Based ISR Systems","tags":["ground surveillance radar"],"prompt":"A Philippine Army battalion must watch one road junction this week and shift the same watch to another junction next week. Which ground-based ISR option lets it do both?","options":["A radar operated only from a satellite ground station","A radar carried only by reconnaissance aircraft","A radar that operates only aboard surface ships","A ground surveillance radar mounted on a vehicle"],"answer":3,"explanation":"Slide 37 says ground surveillance radars can be fixed, usually on a low tower, or mounted to a vehicle as a mobile unit.","sourceSlides":[37]},{"id":11,"difficulty":"easy","category":"Ground-Based ISR Systems","tags":["sensor networks"],"prompt":"A Philippine Army S2 wants to emplace sensors behind enemy lines along an infiltration trail to detect movement. Which ground-based ISR resource is being proposed?","options":["High-altitude, long-endurance vehicles","Commercial imagery products","Submarine sensors","Fixed and mobile sensor networks"],"answer":3,"explanation":"Slide 38 says sensor networks are nothing new; Allied forces have been dropping sensors behind enemy lines for decades.","sourceSlides":[38]},{"id":12,"difficulty":"easy","category":"Maritime ISR Platforms","tags":["surface fleet"],"prompt":"During a joint Army-Navy planning exercise, a staff wants to build maritime ISR around naval aviation alone. Which force should the plan begin with as its backbone?","options":["The surface warfare fleet","The aviation branches","The submarine force","Space-based sensors"],"answer":0,"explanation":"Slide 39 says aviation is crucial, but the backbone of the Navy is its surface warfare fleet; it all begins with surface warfare.","sourceSlides":[39]},{"id":13,"difficulty":"easy","category":"Maritime ISR Platforms","tags":["submarine"],"prompt":"A joint task force supporting Philippine Army units needs to gather information along a hostile coastline without the adversary knowing a collector is present. Which asset best fits?","options":["The surface ship","The submarine","The ground surveillance radar","The HALE vehicle"],"answer":1,"explanation":"Slide 40 says submarines are the most invisible asset in the entire military, which gives them an incredible ability to gather information.","sourceSlides":[40]},{"id":14,"difficulty":"easy","category":"Space-Based ISR Systems","tags":["IMINT","satellite orbit"],"prompt":"A commander relies on satellite imagery alone. Which weakness does the lesson warn about?","options":["Satellite imagery is always blurred over the target","Satellites cannot observe large areas","Targets can track regular orbit cycles and avoid being seen","Satellite imagery is blocked out over friendly territory"],"answer":2,"explanation":"Slide 41 says satellites are in regular orbits, so targets can track the cycles and avoid being seen.","sourceSlides":[41]},{"id":15,"difficulty":"easy","category":"Space-Based ISR Systems","tags":["MASINT"],"prompt":"A Philippine Army division S2 needs space-based collection that identifies which type of emitter a hostile group is using and where it is located. Which discipline fits this requirement?","options":["IMINT","SIGINT","MASINT","HUMINT"],"answer":2,"explanation":"Slide 43 says MASINT identifies distinctive target characteristics such as source, sender, or emitter type and location.","sourceSlides":[43]},{"id":16,"difficulty":"easy","category":"Space-Based ISR Systems","tags":["commercial imagery"],"prompt":"During a combined exercise, a Philippine Army unit must share imagery of its area of operations with a multinational partner. Why is commercial imagery a suitable choice?","options":["It is classified and restricted to national users","It comes only from government satellites","It is unclassified and benefits multinational partners","It cannot be disseminated to partners"],"answer":2,"explanation":"Slide 45 says commercial imagery products are unclassified and benefit multinational partners.","sourceSlides":[45]},{"id":17,"difficulty":"easy","category":"Timeliness, Accuracy, and Fusion","tags":["timeliness"],"prompt":"A report reaches the commander after the enemy has already moved. Which ISR principle was not met?","options":["Fusion","Coverage","Timeliness","Security"],"answer":2,"explanation":"Slide 49 says ISR prioritizes timely collection, processing and dissemination.","sourceSlides":[49]},{"id":18,"difficulty":"easy","category":"Timeliness, Accuracy, and Fusion","tags":["accuracy"],"prompt":"A report misidentifies a unit and leads to a wrong decision. Which principle was not met?","options":["Accuracy","Persistence","Flexibility","Interoperability"],"answer":0,"explanation":"Slide 50 says accuracy ensures reliable information and minimizes errors and misinterpretations.","sourceSlides":[50]},{"id":19,"difficulty":"easy","category":"Timeliness, Accuracy, and Fusion","tags":["fusion"],"prompt":"An analyst combines SIGINT, HUMINT and IMINT into one assessment. Which principle is applied?","options":["Coverage","Persistence","Security","Fusion"],"answer":3,"explanation":"Slide 51 describes fusion as using multiple sources such as SIGINT, HUMINT and IMINT.","sourceSlides":[51]},{"id":20,"difficulty":"easy","category":"Coverage, Persistence, and Flexibility","tags":["coverage"],"prompt":"A collection plan leaves one part of the area of interest unwatched. Which principle is not met?","options":["Timeliness","Coverage","Security","Fusion"],"answer":1,"explanation":"Slide 52 says effective ISR strives for comprehensive coverage of the area of interest.","sourceSlides":[52]},{"id":21,"difficulty":"easy","category":"Coverage, Persistence, and Flexibility","tags":["persistence"],"prompt":"A team keeps watching an area for days to detect changes and movements. Which principle does this show?","options":["Flexibility","Coverage","Accuracy","Persistence"],"answer":3,"explanation":"Slide 53 defines persistence as sustained, continuous monitoring over time.","sourceSlides":[53]},{"id":22,"difficulty":"easy","category":"Coverage, Persistence, and Flexibility","tags":["flexibility"],"prompt":"The enemy changes routes and the S2 redirects assets and adjusts collection priorities. Which principle is applied?","options":["Persistence","Interoperability","Flexibility","Security"],"answer":2,"explanation":"Slide 54 says ISR must adapt by redirecting assets and adjusting collection priorities.","sourceSlides":[54]},{"id":23,"difficulty":"easy","category":"Security, Interoperability, and Ethics","tags":["security"],"prompt":"A Philippine Army S2 restricts who may see sensor locations and the UAS feed so the enemy cannot learn of or exploit them. Which principle is the S2 applying?","options":["Interoperability","Ethical considerations","Security","Accuracy"],"answer":2,"explanation":"Slide 55 says ISR involves sensitive information and assets that require strict security measures to protect against compromise or exploitation by adversaries.","sourceSlides":[55]},{"id":24,"difficulty":"easy","category":"Security, Interoperability, and Ethics","tags":["interoperability"],"prompt":"In a combined exercise, Philippine Army UAS teams and an allied force's aircraft cannot hand off tracking of a target because their procedures do not mesh. Which principle needs attention?","options":["Fusion","Interoperability","Security","Coverage"],"answer":1,"explanation":"Slide 56 says ISR assets often operate in joint and coalition environments where coordination and interoperability among services and allied forces are essential.","sourceSlides":[56]},{"id":25,"difficulty":"easy","category":"Security, Interoperability, and Ethics","tags":["ethical considerations"],"prompt":"A Philippine Army UAS team could get a better view of a target only by collecting in a way the rules of engagement do not allow. Which principle should decide the team's action?","options":["Ethical considerations","Security","Accuracy","Flexibility"],"answer":0,"explanation":"Slide 57 says ethics guide ISR collection, analysis and dissemination in accordance with international laws, rules of engagement and moral principles.","sourceSlides":[57]}]</script>
@@ -484,6 +851,21 @@
   <script>
   (function () {
     'use strict';
+
+    // =======================================================================
+    // CLASS HISTORY CONFIGURATION (the only setting most instructors change)
+    //
+    // Paste the Google Apps Script web app URL (it ends in /exec) between the
+    // quotes, then run `node scripts/build.mjs`. Leave it empty ('') to switch
+    // class history off. Setup steps: apps-script/SETUP.md.
+    //
+    // On finishing an attempt the app sends only the name, difficulty, score,
+    // total, percentage, mastery band and finish time. Answers are never sent.
+    // This URL is the only network address the page ever contacts.
+    // =======================================================================
+    var HISTORY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwTNNYOiebIGo46PzM3fUA9VT6XnS740D72prOPg-0OJ5Kvg4W8LVl-xJEo_gxImxqnmg/exec';
+    // Most recent attempts requested for the score history table (the sheet caps this at 200).
+    var HISTORY_LIMIT = 100;
 
     var MODES = ['easy', 'medium', 'hard'];
     var MODE_LABELS = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
@@ -639,18 +1021,108 @@
       return value;
     }
 
+    // ----- Student name -----
+
+    var NAME_MIN_LENGTH = 2;
+    var NAME_MAX_LENGTH = 40;
+
+    // Collapses whitespace, turns control and invisible formatting characters into spaces, and drops
+    // leading spreadsheet formula triggers (=, +, -, @) exactly as the class history sheet does.
+    function normalizeName(raw) {
+      return String(raw === null || raw === undefined ? '' : raw)
+        .replace(/[\u0000-\u001F\u007F-\u009F\u200B-\u200F\u2028-\u202E\u2060-\u2064\uFEFF]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .replace(/^[=+\-@\s]+/, '');
+    }
+
+    function validateName(raw) {
+      var name = normalizeName(raw);
+      var length = Array.from(name).length;
+      var message = '';
+      if (!length) message = 'Enter your name or username to continue.';
+      else if (length < NAME_MIN_LENGTH) message = 'Your name must be at least ' + NAME_MIN_LENGTH + ' characters.';
+      else if (length > NAME_MAX_LENGTH) message = 'Your name must be ' + NAME_MAX_LENGTH + ' characters or fewer.';
+      else if (!/[\p{L}\p{N}]/u.test(name)) message = 'Your name must include at least one letter or number.';
+      return { valid: !message, name: message ? '' : name, message: message };
+    }
+
+    // ----- Sound cues (Web Audio only; no audio files) -----
+
+    // Each cue is a list of [frequency Hz, start offset s, duration s, waveform, peak gain, end frequency].
+    // Every cue ends within 400 ms and peaks at a low volume.
+    var SOUND_CUES = {
+      select: [[1320, 0, 0.035, 'triangle', 0.035]],
+      correct: [[659.25, 0, 0.12, 'sine', 0.07], [987.77, 0.1, 0.2, 'sine', 0.07]],
+      incorrect: [[196, 0, 0.26, 'triangle', 0.08, 164.81]],
+      start: [[523.25, 0, 0.09, 'sine', 0.06], [783.99, 0.08, 0.16, 'sine', 0.06]],
+      error: [[392, 0, 0.09, 'sine', 0.05, 330]],
+      'finish-mastery': [[523.25, 0, 0.1, 'sine', 0.06], [659.25, 0.08, 0.1, 'sine', 0.06], [783.99, 0.16, 0.1, 'sine', 0.06], [1046.5, 0.24, 0.16, 'sine', 0.06]],
+      'finish-proficient': [[523.25, 0, 0.1, 'sine', 0.06], [659.25, 0.09, 0.1, 'sine', 0.06], [783.99, 0.18, 0.18, 'sine', 0.06]],
+      'finish-developing': [[523.25, 0, 0.12, 'sine', 0.06], [659.25, 0.11, 0.2, 'sine', 0.06]],
+      'finish-review': [[440, 0, 0.14, 'sine', 0.05], [392, 0.13, 0.22, 'sine', 0.05]]
+    };
+
+    // The AudioContext is created lazily by the first cue, which always runs inside a user gesture.
+    function createWebAudioPlayer() {
+      var context = null;
+      return function (cue) {
+        var notes = SOUND_CUES[cue];
+        var AudioCtor = window.AudioContext || window.webkitAudioContext;
+        if (!notes || typeof AudioCtor !== 'function') return;
+        if (!context) context = new AudioCtor();
+        if (context.state === 'suspended' && typeof context.resume === 'function') context.resume();
+        var now = context.currentTime + 0.01;
+        notes.forEach(function (note) {
+          var start = now + note[1];
+          var end = start + note[2];
+          var oscillator = context.createOscillator();
+          var gain = context.createGain();
+          oscillator.type = note[3];
+          oscillator.frequency.setValueAtTime(note[0], start);
+          if (note[5]) oscillator.frequency.exponentialRampToValueAtTime(note[5], end);
+          gain.gain.setValueAtTime(0.0001, start);
+          gain.gain.exponentialRampToValueAtTime(note[4], start + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.0001, end);
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start(start);
+          oscillator.stop(end + 0.02);
+        });
+      };
+    }
+
+    function finishCue(bandName) {
+      return {
+        Mastery: 'finish-mastery',
+        Proficient: 'finish-proficient',
+        Developing: 'finish-developing'
+      }[bandName] || 'finish-review';
+    }
+
     // ----- State and DOM -----
+
+    var HISTORY_FILTERS = ['all', 'easy', 'medium', 'hard'];
+    var ENDPOINT = String(HISTORY_ENDPOINT || '').trim();
 
     var state = {
       available: false,
       errors: [],
       banks: null,
       studyConfirmed: false,
+      studentName: '',
+      nameValid: false,
       view: 'landing',
       attempt: null,
       results: null,
+      submission: null,
+      history: { filter: 'all', status: 'idle', rows: [], request: 0 },
+      soundEnabled: true,
+      soundPlayer: createWebAudioPlayer(),
       random: Math.random
     };
+    var defaultSoundPlayer = state.soundPlayer;
+    var pending = [];
 
     function byId(id) { return document.getElementById(id); }
 
@@ -661,6 +1133,8 @@
         results: byId('view-results'),
         unavailable: byId('view-unavailable')
       },
+      nameInput: byId('student-name'),
+      nameMessage: byId('student-name-message'),
       studyConfirm: byId('study-confirm'),
       modeHint: byId('mode-hint'),
       difficultyHeading: byId('difficulty-heading'),
@@ -670,7 +1144,10 @@
         medium: byId('mode-medium'),
         hard: byId('mode-hard')
       },
+      soundToggle: byId('btn-sound'),
+      soundState: byId('sound-state'),
       quizHeading: byId('quiz-heading'),
+      quizStudent: byId('quiz-student'),
       quizProgress: byId('quiz-progress'),
       quizStatus: byId('quiz-status'),
       questionHeading: byId('question-heading'),
@@ -688,17 +1165,50 @@
       resultsStrengths: byId('results-strengths'),
       resultsGaps: byId('results-gaps'),
       resultsReview: byId('results-review'),
+      saveBox: byId('history-save'),
+      saveMessage: byId('history-save-message'),
+      btnSaveRetry: byId('btn-history-retry'),
       btnPrint: byId('btn-print'),
       btnRetake: byId('btn-retake'),
       btnChoose: byId('btn-choose'),
-      radios: []
+      btnHistory: byId('btn-history'),
+      historyPanel: byId('history-panel'),
+      historyHeading: byId('history-heading'),
+      historyRefresh: byId('btn-history-refresh'),
+      historyFilters: {
+        all: byId('history-filter-all'),
+        easy: byId('history-filter-easy'),
+        medium: byId('history-filter-medium'),
+        hard: byId('history-filter-hard')
+      },
+      historyStatus: byId('history-status'),
+      historyTableWrap: byId('history-table-wrap'),
+      historyBody: byId('history-body'),
+      radios: [],
+      options: []
     };
 
+    // Every node is built with textContent; remote or authored strings never pass through an HTML parser.
     function make(tag, className, text) {
       var node = document.createElement(tag);
       if (className) node.className = className;
       if (text !== undefined) node.textContent = text;
       return node;
+    }
+
+    function textNode(text) { return document.createTextNode(text); }
+
+    function iconNode(name) {
+      var icon = make('span', 'icon icon-' + name);
+      icon.setAttribute('aria-hidden', 'true');
+      return icon;
+    }
+
+    function tagNode(kind, icon, text) {
+      var tag = make('span', 'tag tag-' + kind);
+      if (icon) tag.appendChild(iconNode(icon));
+      tag.appendChild(textNode(text));
+      return tag;
     }
 
     // Empties a node and appends the given nodes; avoids the Safari 14+ only children-replacement API.
@@ -711,11 +1221,28 @@
       return LETTERS[index] + '. ' + question.options[index];
     }
 
+    // Keeps a promise visible to whenSettled() until it finishes (used by the verifier and never rejects).
+    function track(promise) {
+      pending.push(promise);
+      var done = function () {
+        var index = pending.indexOf(promise);
+        if (index !== -1) pending.splice(index, 1);
+      };
+      promise.then(done, done);
+      return promise;
+    }
+
+    function whenSettled() {
+      if (!pending.length) return Promise.resolve();
+      return Promise.all(pending.slice()).then(whenSettled);
+    }
+
     function showView(name) {
       state.view = name;
       Object.keys(ui.views).forEach(function (key) {
         ui.views[key].hidden = key !== name;
       });
+      ui.historyPanel.hidden = !(name === 'landing' || name === 'results');
       // Lets the stylesheet compact the hero outside the landing view.
       document.body.setAttribute('data-view', name);
     }
@@ -733,9 +1260,10 @@
     }
 
     function showValidation(message) {
-      ui.validation.textContent = message;
+      setChildren(ui.validation, [iconNode('alert'), make('span', null, message)]);
       ui.validation.hidden = false;
       ui.validation.focus();
+      playCue('error');
     }
 
     function checkedCount(attempt) {
@@ -749,32 +1277,92 @@
       return -1;
     }
 
-    // ----- Study gate -----
+    // ----- Sound -----
+
+    function playCue(cue) {
+      if (!state.soundEnabled || typeof state.soundPlayer !== 'function') return false;
+      try {
+        state.soundPlayer(cue);
+      } catch (error) {
+        // Audio is an enhancement only; a failing audio stack must never interrupt the quiz.
+      }
+      return true;
+    }
+
+    function setSoundEnabled(enabled) {
+      state.soundEnabled = Boolean(enabled);
+      ui.soundToggle.setAttribute('aria-pressed', String(state.soundEnabled));
+      ui.soundState.textContent = state.soundEnabled ? 'On' : 'Off';
+      return state.soundEnabled;
+    }
+
+    // ----- Start gate: a valid name and the study confirmation -----
+
+    function gateOpen() {
+      return state.available && state.studyConfirmed && state.nameValid;
+    }
+
+    function updateGate() {
+      var open = gateOpen();
+      MODES.forEach(function (mode) {
+        ui.modeButtons[mode].disabled = !open;
+      });
+      if (state.available) {
+        var missing = [];
+        if (!state.nameValid) missing.push('enter your name');
+        if (!state.studyConfirmed) missing.push('check the study confirmation');
+        ui.modeHint.textContent = open
+          ? 'Difficulty buttons enabled. Choose Easy, Medium, or Hard to begin.'
+          : 'To enable the difficulty buttons, ' + missing.join(' and ') + ' above.';
+      }
+      return open;
+    }
 
     function setStudyConfirmed(confirmed) {
       state.studyConfirmed = Boolean(confirmed) && state.available;
       ui.studyConfirm.checked = state.studyConfirmed;
-      MODES.forEach(function (mode) {
-        ui.modeButtons[mode].disabled = !state.studyConfirmed;
-      });
-      if (state.available) {
-        ui.modeHint.textContent = state.studyConfirmed
-          ? 'Difficulty buttons enabled. Choose Easy, Medium, or Hard to begin.'
-          : 'Check the study confirmation above to enable the difficulty buttons.';
-      }
+      updateGate();
       return state.studyConfirmed;
+    }
+
+    function renderNameMessage(result, force) {
+      var show = !result.valid && (force || normalizeName(ui.nameInput.value) !== '');
+      ui.nameInput.setAttribute('aria-invalid', show ? 'true' : 'false');
+      if (show) {
+        setChildren(ui.nameMessage, [iconNode('alert'), make('span', null, result.message)]);
+        ui.nameMessage.hidden = false;
+      } else {
+        ui.nameMessage.textContent = '';
+        ui.nameMessage.hidden = true;
+      }
+    }
+
+    // Validates and stores the student's name; `showMessage` forces the message even for an empty field.
+    function setStudentName(raw, showMessage) {
+      if (!state.available) return false;
+      if (ui.nameInput.value !== String(raw)) ui.nameInput.value = String(raw);
+      var result = validateName(raw);
+      state.nameValid = result.valid;
+      state.studentName = result.name;
+      renderNameMessage(result, Boolean(showMessage));
+      updateGate();
+      if (state.history.status === 'ready') renderHistory();
+      return result.valid;
     }
 
     // ----- Quiz flow -----
 
     function startQuiz(mode) {
-      if (!state.available || !state.studyConfirmed || MODES.indexOf(mode) === -1) return false;
+      if (!gateOpen() || MODES.indexOf(mode) === -1) return false;
       state.attempt = createAttempt(mode, state.banks, state.random);
+      state.attempt.studentName = state.studentName;
       state.results = null;
+      state.submission = null;
       setTheme(mode);
       showView('quiz');
       renderQuestion();
       ui.questionHeading.focus();
+      playCue('start');
       return true;
     }
 
@@ -787,6 +1375,8 @@
       var total = attempt.questions.length;
 
       ui.quizHeading.textContent = MODE_LABELS[attempt.mode] + ' examination';
+      var student = make('strong', null, attempt.studentName);
+      setChildren(ui.quizStudent, [textNode('Student: '), student]);
       ui.quizProgress.setAttribute('max', String(total));
       ui.quizProgress.setAttribute('value', String(done));
       ui.quizStatus.textContent = 'Question ' + (index + 1) + ' of ' + total + '. ' + done + ' of ' + total + ' answers checked.';
@@ -798,6 +1388,7 @@
       var legend = make('legend', 'question-prompt', question.prompt);
       legend.id = 'question-prompt';
       fieldset.appendChild(legend);
+      ui.options = [];
       ui.radios = question.options.map(function (option, optionIndex) {
         var inputId = 'answer-option-' + optionIndex;
         var label = make('label', 'option');
@@ -810,20 +1401,18 @@
         input.checked = response.selected === optionIndex;
         input.disabled = response.checked;
         input.addEventListener('change', function () { selectAnswer(optionIndex); });
+        var letter = make('span', 'option-letter');
+        letter.append(make('span', null, LETTERS[optionIndex]), make('span', 'sr-only', '.'));
         var body = make('span', 'option-body');
-        body.append(make('span', 'option-letter', LETTERS[optionIndex] + '.'), ' ', make('span', 'option-text', option));
-        if (response.checked && optionIndex === question.answer) {
-          label.classList.add('option-correct');
-          body.appendChild(make('span', 'option-tag', 'Correct answer'));
-        } else if (response.checked && optionIndex === response.selected) {
-          label.classList.add('option-incorrect');
-          body.appendChild(make('span', 'option-tag', 'Your answer'));
-        }
-        label.append(input, body);
+        var tags = make('span', 'option-tags');
+        body.append(make('span', 'option-text', option), tags);
+        label.append(input, letter, textNode(' '), body);
         fieldset.appendChild(label);
+        ui.options.push({ label: label, tags: tags });
         return input;
       });
       setChildren(ui.questionArea, [fieldset]);
+      applyOptionStates(question, response);
 
       hideValidation();
       renderFeedback(question, response);
@@ -835,6 +1424,48 @@
       ui.btnFinish.hidden = !allChecked;
     }
 
+    // Unselected, selected, correct, incorrect and dimmed states, each with a text tag, never colour alone.
+    function applyOptionStates(question, response) {
+      ui.options.forEach(function (entry, index) {
+        var classes = ['option'];
+        var tags = [];
+        if (response.checked) {
+          classes.push('option-locked');
+          if (index === question.answer) {
+            classes.push('option-correct');
+            tags.push(tagNode('correct', 'check', 'Correct answer'));
+            if (index === response.selected) tags.push(tagNode('correct', 'check', 'Your answer'));
+          } else if (index === response.selected) {
+            classes.push('option-incorrect');
+            tags.push(tagNode('incorrect', 'cross', 'Your answer'));
+          } else {
+            classes.push('option-dimmed');
+          }
+        } else if (index === response.selected) {
+          classes.push('option-selected');
+          tags.push(tagNode('selected', 'check', 'Selected'));
+        }
+        entry.label.className = classes.join(' ');
+        setChildren(entry.tags, tags);
+      });
+    }
+
+    function answerLine(kind, label, question, index) {
+      var line = make('p', 'answer-line answer-line-' + kind + ' feedback-' + (label === 'Your answer:' ? 'selected' : 'answer'));
+      line.append(make('span', 'answer-label', label), textNode(' ' + optionText(question, index)));
+      return line;
+    }
+
+    function explanationBlock(question, className) {
+      var block = make('div', 'explanation ' + className);
+      block.append(
+        make('p', 'section-label', 'Explanation'),
+        make('p', 'explanation-text', question.explanation),
+        make('p', 'source-ref', 'Lesson reference: slide ' + question.sourceSlides.join(', '))
+      );
+      return block;
+    }
+
     function renderFeedback(question, response) {
       if (!response.checked) {
         ui.feedback.className = 'feedback';
@@ -844,22 +1475,28 @@
       }
       var correct = response.selected === question.answer;
       ui.feedback.className = 'feedback ' + (correct ? 'feedback-correct' : 'feedback-incorrect');
-      var verdict = make('p', 'feedback-verdict');
-      verdict.appendChild(make('strong', null, correct ? 'Correct.' : 'Incorrect.'));
-      var parts = [verdict];
-      if (!correct) parts.push(make('p', 'feedback-selected', 'Your answer: ' + optionText(question, response.selected)));
-      parts.push(
-        make('p', 'feedback-answer', 'Correct answer: ' + optionText(question, question.answer)),
-        make('p', 'feedback-explanation', 'Explanation: ' + question.explanation),
-        make('p', 'feedback-source', 'Lesson reference: slide ' + question.sourceSlides.join(', '))
-      );
-      setChildren(ui.feedback, parts);
+      var header = make('p', 'feedback-header feedback-verdict');
+      var mark = make('span', 'feedback-mark');
+      mark.appendChild(iconNode(correct ? 'check' : 'cross'));
+      header.append(mark, make('span', null, correct ? 'Correct.' : 'Incorrect.'));
+      var body = make('div', 'feedback-body');
+      if (correct) {
+        body.appendChild(answerLine('correct', 'Correct answer:', question, question.answer));
+      } else {
+        body.append(
+          answerLine('incorrect', 'Your answer:', question, response.selected),
+          answerLine('correct', 'Correct answer:', question, question.answer)
+        );
+      }
+      body.appendChild(explanationBlock(question, 'feedback-explanation'));
+      setChildren(ui.feedback, [header, body]);
       ui.feedback.hidden = false;
     }
 
     function selectAnswer(index) {
       var attempt = state.attempt;
       if (state.view !== 'quiz' || !attempt) return false;
+      var question = attempt.questions[attempt.current];
       var response = attempt.responses[attempt.current];
       if (response.checked || !Number.isInteger(index) || index < 0 || index > 3) {
         ui.radios.forEach(function (radio, radioIndex) { radio.checked = response.selected === radioIndex; });
@@ -867,13 +1504,16 @@
       }
       response.selected = index;
       ui.radios.forEach(function (radio, radioIndex) { radio.checked = radioIndex === index; });
+      applyOptionStates(question, response);
       hideValidation();
+      playCue('select');
       return true;
     }
 
     function checkAnswer() {
       var attempt = state.attempt;
       if (state.view !== 'quiz' || !attempt) return false;
+      var question = attempt.questions[attempt.current];
       var response = attempt.responses[attempt.current];
       if (response.checked) return false;
       if (response.selected === null) {
@@ -883,6 +1523,7 @@
       response.checked = true;
       renderQuestion();
       ui.feedback.focus();
+      playCue(response.selected === question.answer ? 'correct' : 'incorrect');
       return true;
     }
 
@@ -906,9 +1547,12 @@
         return false;
       }
       state.results = computeResults(attempt);
+      state.results.studentName = attempt.studentName;
       renderResults(state.results);
       showView('results');
       ui.resultsHeading.focus();
+      playCue(finishCue(state.results.band.name));
+      submitAttempt(buildSubmission(state.results));
       return true;
     }
 
@@ -922,29 +1566,54 @@
       if (!state.available) return false;
       state.attempt = null;
       state.results = null;
+      state.submission = null;
       setTheme(null);
       showView('landing');
       setStudyConfirmed(state.studyConfirmed);
       ui.difficultyHeading.focus();
+      if (ENDPOINT) loadHistory(state.history.filter);
       return true;
     }
 
     // ----- Results -----
 
+    function bandClass(name) {
+      return 'band-' + String(name).toLowerCase().replace(/[^a-z]+/g, '-');
+    }
+
     function renderResults(results) {
       ui.resultsHeading.textContent = MODE_LABELS[results.mode] + ' examination results';
 
-      var score = make('p', 'results-score');
-      score.append(make('strong', null, 'Score: '), results.score + ' of ' + results.total + ' correct (' + results.percentage + '%)');
-      var band = make('p', 'results-band');
-      band.append(make('strong', null, 'Mastery band: '), results.band.name + '. ' + results.band.description);
-      setChildren(ui.resultsSummary, [score, band]);
+      var card = make('div', 'score-card ' + bandClass(results.band.name));
+      var figure = make('p', 'score-figure results-score');
+      figure.append(make('span', 'score-percent', results.percentage + '%'), make('span', 'score-count', results.score + ' of ' + results.total + ' correct'));
+      var meta = make('div', 'score-meta');
+      var student = make('p', 'results-student');
+      student.append(make('span', 'meta-label', 'Student'), make('span', 'meta-value', results.studentName));
+      var mode = make('p', 'results-mode');
+      mode.append(make('span', 'meta-label', 'Difficulty'), make('span', 'meta-value', MODE_LABELS[results.mode]));
+      var bandLabel = make('p', 'meta-label', 'Mastery band');
+      var band = make('p', 'band-badge results-band');
+      band.append(iconNode(results.percentage >= STRENGTH_THRESHOLD ? 'check' : 'alert'), make('span', null, results.band.name));
+      meta.append(student, mode, bandLabel, band, make('p', 'band-description', results.band.description));
+      card.append(figure, meta);
+      setChildren(ui.resultsSummary, [card]);
 
       var rows = results.categories.map(function (entry) {
+        var strength = entry.status === 'Strength';
         var row = document.createElement('tr');
         var name = make('th', null, entry.category);
         name.setAttribute('scope', 'row');
-        row.append(name, make('td', null, entry.correct + ' of ' + entry.total + ' (' + entry.percentage + '%)'), make('td', null, entry.status));
+        var count = make('td', 'topic-count');
+        var bar = make('span', 'bar');
+        bar.setAttribute('aria-hidden', 'true');
+        var fill = make('span', 'bar-fill ' + (strength ? 'bar-strength' : 'bar-gap'));
+        fill.setAttribute('style', 'width: ' + entry.percentage + '%');
+        bar.appendChild(fill);
+        count.append(make('span', null, entry.correct + ' of ' + entry.total + ' (' + entry.percentage + '%)'), bar);
+        var status = make('td', 'topic-status');
+        status.appendChild(tagNode(strength ? 'strength' : 'gap', strength ? 'check' : 'alert', entry.status));
+        row.append(name, count, status);
         return row;
       });
       setChildren(ui.resultsCategories, rows);
@@ -955,14 +1624,19 @@
       var items = results.review.map(function (entry) {
         var question = entry.question;
         var item = make('li', 'review-item ' + (entry.correct ? 'review-correct' : 'review-incorrect'));
+        var head = make('h4', 'review-head');
+        head.append(
+          make('span', null, 'Question ' + entry.number),
+          make('span', 'sr-only', ': '),
+          tagNode(entry.correct ? 'correct' : 'incorrect', entry.correct ? 'check' : 'cross', entry.correct ? 'Correct' : 'Incorrect')
+        );
         item.append(
-          make('h4', null, 'Question ' + entry.number + ': ' + (entry.correct ? 'Correct' : 'Incorrect')),
+          head,
           make('p', 'review-topic', 'Topic: ' + question.category),
           make('p', 'review-prompt', question.prompt),
-          make('p', 'review-selected', 'Your answer: ' + optionText(question, entry.selected)),
-          make('p', 'review-answer', 'Correct answer: ' + optionText(question, question.answer)),
-          make('p', 'review-explanation', 'Explanation: ' + question.explanation),
-          make('p', 'review-source', 'Lesson reference: slide ' + question.sourceSlides.join(', '))
+          answerLine(entry.correct ? 'correct' : 'incorrect', 'Your answer:', question, entry.selected),
+          answerLine('correct', 'Correct answer:', question, question.answer),
+          explanationBlock(question, 'review-explanation')
         );
         return item;
       });
@@ -977,6 +1651,223 @@
       setChildren(list, entries.map(function (entry) {
         return make('li', null, entry.category + ': ' + entry.correct + ' of ' + entry.total + ' correct');
       }));
+    }
+
+    // ----- Class history (network) -----
+
+    // The single network call in the app. It only ever contacts HISTORY_ENDPOINT, and it
+    // resolves with the parsed {ok: true, ...} body or rejects on any HTTP, JSON or {ok: false} failure.
+    function historyRequest(url, init) {
+      if (!ENDPOINT || url.indexOf(ENDPOINT) !== 0) return Promise.reject(new Error('Class history is not configured.'));
+      if (typeof window.fetch !== 'function') return Promise.reject(new Error('This browser cannot reach the class history.'));
+      return window.fetch(url, init).then(function (response) {
+        if (!response || !response.ok) throw new Error('The class history returned an error.');
+        return response.json();
+      }).then(function (body) {
+        if (!body || body.ok !== true) throw new Error('The class history rejected the request.');
+        return body;
+      });
+    }
+
+    function buildSubmission(results) {
+      return {
+        name: results.studentName,
+        mode: results.mode,
+        score: results.score,
+        total: results.total,
+        percent: results.percentage,
+        band: results.band.name,
+        finishedAt: new Date().toISOString()
+      };
+    }
+
+    // Saves one finished attempt. Failure only changes the small notice; results are already on screen.
+    function submitAttempt(payload) {
+      var submission = { payload: payload, status: ENDPOINT ? 'saving' : 'not-configured' };
+      state.submission = submission;
+      renderSaveStatus();
+      if (!ENDPOINT) return Promise.resolve(false);
+      return track(historyRequest(ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).then(function () {
+        if (state.submission !== submission) return false;
+        submission.status = 'saved';
+        renderSaveStatus();
+        loadHistory(state.history.filter);
+        return true;
+      }, function () {
+        if (state.submission !== submission) return false;
+        submission.status = 'failed';
+        renderSaveStatus();
+        return false;
+      }));
+    }
+
+    function retrySubmission() {
+      if (!state.submission || state.submission.status !== 'failed') return Promise.resolve(false);
+      return submitAttempt(state.submission.payload);
+    }
+
+    function renderSaveStatus() {
+      var submission = state.submission;
+      var status = submission ? submission.status : 'none';
+      var copy = {
+        none: null,
+        saving: ['dot', 'Saving your score to the class history…'],
+        saved: ['check', 'Saved to the class history.'],
+        failed: ['alert', 'Could not save to class history. Your results below are unaffected.'],
+        'not-configured': ['dot', 'Class history is not set up, so this score was not saved to a class list.']
+      }[status];
+      ui.saveBox.className = 'history-save save-' + status;
+      setChildren(ui.saveMessage, copy ? [iconNode(copy[0]), make('span', null, copy[1])] : []);
+      ui.saveBox.hidden = !copy;
+      ui.btnSaveRetry.hidden = status !== 'failed';
+    }
+
+    function historyUrl(filter) {
+      return ENDPOINT + (ENDPOINT.indexOf('?') === -1 ? '?' : '&') + 'mode=' + encodeURIComponent(filter) + '&limit=' + HISTORY_LIMIT;
+    }
+
+    function toInteger(value) {
+      if (value === null || value === undefined || value === '') return null;
+      var number = Number(value);
+      return Number.isFinite(number) ? Math.round(number) : null;
+    }
+
+    // Treats every remote field as untrusted: coerced to plain strings or numbers, clipped and validated.
+    function cleanHistoryRow(row) {
+      if (!row || typeof row !== 'object') return null;
+      var mode = String(row.mode === null || row.mode === undefined ? '' : row.mode).trim().toLowerCase();
+      if (MODES.indexOf(mode) === -1) return null;
+      var name = Array.from(normalizeName(row.name)).slice(0, 60).join('');
+      if (!name) return null;
+      var finishedAt = String(row.finishedAt === null || row.finishedAt === undefined ? '' : row.finishedAt);
+      var time = Date.parse(finishedAt);
+      return {
+        name: name,
+        mode: mode,
+        score: toInteger(row.score),
+        total: toInteger(row.total),
+        percent: toInteger(row.percent),
+        band: normalizeName(row.band).slice(0, 40),
+        finishedAt: finishedAt,
+        time: isNaN(time) ? null : time
+      };
+    }
+
+    function loadHistory(filter) {
+      if (HISTORY_FILTERS.indexOf(filter) === -1) filter = state.history.filter;
+      var history = state.history;
+      history.filter = filter;
+      if (!ENDPOINT) {
+        history.status = 'not-configured';
+        history.rows = [];
+        renderHistory();
+        return Promise.resolve(false);
+      }
+      var request = ++history.request;
+      history.status = 'loading';
+      renderHistory();
+      return track(historyRequest(historyUrl(filter), { method: 'GET', cache: 'no-store' }).then(function (body) {
+        if (request !== history.request) return false;
+        var rows = Array.isArray(body.rows) ? body.rows : [];
+        history.rows = rows.map(cleanHistoryRow).filter(function (row) {
+          return row && (filter === 'all' || row.mode === filter);
+        }).map(function (row, index) {
+          row.order = index;
+          return row;
+        }).sort(function (a, b) {
+          // Newest first; rows without a readable date keep the sheet's order after dated rows.
+          if (a.time !== null && b.time !== null && a.time !== b.time) return b.time - a.time;
+          if (a.time === null && b.time !== null) return 1;
+          if (b.time === null && a.time !== null) return -1;
+          return a.order - b.order;
+        }).slice(0, HISTORY_LIMIT);
+        history.status = history.rows.length ? 'ready' : 'empty';
+        renderHistory();
+        return true;
+      }, function () {
+        if (request !== history.request) return false;
+        history.status = 'error';
+        history.rows = [];
+        renderHistory();
+        return false;
+      }));
+    }
+
+    function isCurrentStudent(name) {
+      return Boolean(state.studentName) && name.toLowerCase() === state.studentName.toLowerCase();
+    }
+
+    function pad(number) { return (number < 10 ? '0' : '') + number; }
+
+    function formatDate(time) {
+      var date = new Date(time);
+      return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+    }
+
+    function historyCell(label, content, className) {
+      var cell = make('td', className);
+      cell.setAttribute('data-label', label);
+      if (typeof content === 'string') cell.textContent = content;
+      else cell.appendChild(content);
+      return cell;
+    }
+
+    function historyRowNode(row) {
+      var self = isCurrentStudent(row.name);
+      var tr = make('tr', 'history-row' + (self ? ' history-row-self' : ''));
+      var name = make('span', 'history-name');
+      name.appendChild(make('span', 'history-name-text', row.name));
+      if (self) name.append(textNode(' '), tagNode('you', null, 'You'));
+      var date;
+      if (row.time === null) {
+        date = make('span', null, 'Unknown');
+      } else {
+        date = make('time', null, formatDate(row.time));
+        date.setAttribute('datetime', new Date(row.time).toISOString());
+      }
+      tr.append(
+        historyCell('Name', name, 'history-name-cell'),
+        historyCell('Mode', MODE_LABELS[row.mode]),
+        historyCell('Score', row.score !== null && row.total !== null ? row.score + '/' + row.total : '—'),
+        historyCell('%', row.percent !== null ? row.percent + '%' : '—'),
+        historyCell('Band', row.band || '—'),
+        historyCell('Date', date)
+      );
+      return tr;
+    }
+
+    function renderHistory() {
+      var history = state.history;
+      HISTORY_FILTERS.forEach(function (filter) {
+        ui.historyFilters[filter].setAttribute('aria-pressed', String(filter === history.filter));
+        ui.historyFilters[filter].disabled = !ENDPOINT;
+      });
+      ui.historyRefresh.disabled = !ENDPOINT;
+      var scope = history.filter === 'all' ? '' : ' ' + MODE_LABELS[history.filter];
+      var copy = {
+        idle: ['dot', ''],
+        'not-configured': ['alert', 'Class history is not set up yet, so scores are not being collected. Instructors: follow apps-script/SETUP.md in the quiz repository to connect a Google Sheet, then set HISTORY_ENDPOINT.'],
+        loading: ['dot', 'Loading class history…'],
+        empty: ['dot', 'No' + scope + ' attempts have been recorded yet.'],
+        error: ['alert', 'Could not load the class history. Check your connection, then select Refresh to try again.'],
+        ready: [null, 'Showing the ' + history.rows.length + ' most recent' + scope + ' attempts, newest first.']
+      }[history.status];
+      ui.historyStatus.className = 'history-status status-' + history.status;
+      setChildren(ui.historyStatus, (copy[0] ? [iconNode(copy[0])] : []).concat([make('span', null, copy[1])]));
+      ui.historyTableWrap.hidden = history.status !== 'ready';
+      ui.historyTableWrap.setAttribute('aria-busy', String(history.status === 'loading'));
+      setChildren(ui.historyBody, history.status === 'ready' ? history.rows.map(historyRowNode) : []);
+    }
+
+    function showHistory() {
+      if (ui.historyPanel.hidden) return false;
+      ui.historyHeading.focus();
+      if (ENDPOINT) loadHistory(state.history.filter);
+      return true;
     }
 
     // ----- Startup -----
@@ -1005,10 +1896,14 @@
       state.errors = loaded.errors.concat(validation.errors);
       state.available = state.errors.length === 0;
 
+      ui.soundToggle.addEventListener('click', function () { setSoundEnabled(!state.soundEnabled); });
+      setSoundEnabled(true);
+
       if (!state.available) {
         state.banks = null;
         ui.studyConfirm.checked = false;
         ui.studyConfirm.disabled = true;
+        ui.nameInput.disabled = true;
         MODES.forEach(function (mode) { ui.modeButtons[mode].disabled = true; });
         showView('unavailable');
         ui.unavailableHeading.focus();
@@ -1017,6 +1912,9 @@
       }
 
       state.banks = deepFreeze(loaded.banks);
+      ui.nameInput.addEventListener('input', function () { setStudentName(ui.nameInput.value, false); });
+      ui.nameInput.addEventListener('change', function () { setStudentName(ui.nameInput.value, true); });
+      ui.nameInput.addEventListener('blur', function () { setStudentName(ui.nameInput.value, true); });
       ui.studyConfirm.addEventListener('change', function () { setStudyConfirmed(ui.studyConfirm.checked); });
       MODES.forEach(function (mode) {
         ui.modeButtons[mode].addEventListener('click', function () { startQuiz(mode); });
@@ -1028,9 +1926,18 @@
       ui.btnPrint.addEventListener('click', function () { window.print(); });
       ui.btnRetake.addEventListener('click', retakeQuiz);
       ui.btnChoose.addEventListener('click', resetToDifficulty);
+      ui.btnHistory.addEventListener('click', showHistory);
+      ui.btnSaveRetry.addEventListener('click', retrySubmission);
+      ui.historyRefresh.addEventListener('click', function () { loadHistory(state.history.filter); });
+      HISTORY_FILTERS.forEach(function (filter) {
+        ui.historyFilters[filter].addEventListener('click', function () { loadHistory(filter); });
+      });
 
       showView('landing');
+      setStudentName(ui.nameInput.value, false);
       setStudyConfirmed(false);
+      renderSaveStatus();
+      loadHistory('all');
     }
 
     function getState() {
@@ -1038,9 +1945,15 @@
         available: state.available,
         errors: state.errors,
         studyConfirmed: state.studyConfirmed,
+        studentName: state.studentName,
+        nameValid: state.nameValid,
         view: state.view,
         attempt: state.attempt,
-        results: state.results
+        results: state.results,
+        submission: state.submission,
+        history: { filter: state.history.filter, status: state.history.status, rows: state.history.rows },
+        historyConfigured: Boolean(ENDPOINT),
+        soundEnabled: state.soundEnabled
       }));
     }
 
@@ -1052,6 +1965,8 @@
       createAttempt: createAttempt,
       computeResults: computeResults,
       masteryBand: masteryBand,
+      validateName: validateName,
+      setStudentName: setStudentName,
       setStudyConfirmed: setStudyConfirmed,
       startQuiz: startQuiz,
       selectAnswer: selectAnswer,
@@ -1060,6 +1975,12 @@
       finishQuiz: finishQuiz,
       retakeQuiz: retakeQuiz,
       resetToDifficulty: resetToDifficulty,
+      loadHistory: loadHistory,
+      retrySubmission: retrySubmission,
+      whenSettled: whenSettled,
+      setSoundEnabled: setSoundEnabled,
+      // Replaces the Web Audio player (tests inject a recorder); null restores the default player.
+      setSoundPlayer: function (player) { state.soundPlayer = typeof player === 'function' ? player : defaultSoundPlayer; },
       getState: getState,
       getBanks: function () { return state.banks; },
       setRandom: function (random) { state.random = typeof random === 'function' ? random : Math.random; }
