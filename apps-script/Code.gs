@@ -1,12 +1,14 @@
 // Class score history for the quiz sites. Deploy as a Web app (Execute as: Me, Who has access: Anyone).
 // One spreadsheet serves every lesson quiz: each lesson has its own tab (see LESSONS).
 // POST (Content-Type text/plain) body: {"lesson","name","mode","score","total","percent","band","finishedAt"}
-// GET  ?lesson=isr|armor&mode=all|easy|medium|hard&limit=100  ->  {"ok":true,"rows":[...newest first]}
+// GET  ?lesson=isr|armor|fieldartillery|armyops&mode=all|easy|medium|hard&limit=100  ->  {"ok":true,"rows":[...newest first]}
 // A request without "lesson" is treated as the first lesson ('isr'), so older quiz pages keep working.
 
 var LESSONS = {
   isr: 'History',        // first quiz: ISR Operations (original tab name kept)
-  armor: 'Armor History' // Armor Operations quiz; add more lines here for future lessons
+  armor: 'Armor History',                  // Fundamentals of Armor Operations quiz
+  fieldartillery: 'Field Artillery History', // Field Artillery Operations quiz
+  armyops: 'Army Operations History'         // Introduction to Army Operations quiz; add more lines here for future lessons
 };
 var DEFAULT_LESSON = 'isr';
 var HEADERS = ['Received', 'Name', 'Mode', 'Score', 'Total', 'Percent', 'Band', 'Finished'];

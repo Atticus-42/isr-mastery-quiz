@@ -976,8 +976,8 @@ await test('Finishing an attempt submits exactly one history record with the att
   assert.equal(post.url, TEST_ENDPOINT);
   assert.equal(post.headers['Content-Type'], 'text/plain;charset=utf-8', 'text/plain avoids a CORS preflight');
   const payload = JSON.parse(post.body);
-  assert.deepEqual(Object.keys(payload).sort(), ['band', 'finishedAt', 'mode', 'name', 'percent', 'score', 'total']);
-  assert.deepEqual({ ...payload, finishedAt: undefined }, { name: 'Maria Santos', mode: 'easy', score: 20, total: 25, percent: 80, band: 'Proficient', finishedAt: undefined });
+  assert.deepEqual(Object.keys(payload).sort(), ['band', 'finishedAt', 'lesson', 'mode', 'name', 'percent', 'score', 'total']);
+  assert.deepEqual({ ...payload, finishedAt: undefined }, { lesson: 'isr', name: 'Maria Santos', mode: 'easy', score: 20, total: 25, percent: 80, band: 'Proficient', finishedAt: undefined });
   assert.match(payload.finishedAt, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
   assert.ok(Date.parse(payload.finishedAt) >= before - 1000 && Date.parse(payload.finishedAt) <= Date.now() + 1000);
   for (const call of fetch.calls) {
@@ -986,7 +986,7 @@ await test('Finishing an attempt submits exactly one history record with the att
   }
   const gets = fetch.calls.filter(call => call.method === 'GET');
   assert.ok(gets.length >= 2, 'history loads at start and refreshes after saving');
-  assert.equal(gets[0].url, `${TEST_ENDPOINT}?mode=all&limit=100`);
+  assert.equal(gets[0].url, `${TEST_ENDPOINT}?lesson=isr&mode=all&limit=100`);
   assert.match(byId(app, 'history-save-message').textContent, /Saved to the class history/);
   assert.equal(isShown(byId(app, 'btn-history-retry')), false);
   byId(app, 'btn-retake').click();
@@ -1055,7 +1055,7 @@ await test('Class history renders remote rows as text, newest first, marks the c
   const rows = [
     { name: 'Old Timer', mode: 'easy', score: 10, total: 25, percent: 40, band: 'Needs review', finishedAt: '2026-09-01T08:00:00.000Z' },
     { name: hostile, mode: 'medium', score: 18, total: 25, percent: 72, band: '<b>Developing</b>', finishedAt: '2026-09-29T08:00:00.000Z' },
-    { name: 'Maria Santos', mode: 'hard', score: 23, total: 25, percent: 92, band: 'Mastery', finishedAt: '2026-09-30T08:00:00.000Z' },
+    { lesson: 'isr', name: 'Maria Santos', mode: 'hard', score: 23, total: 25, percent: 92, band: 'Mastery', finishedAt: '2026-09-30T08:00:00.000Z' },
     { name: 'maria santos', mode: 'medium', score: 20, total: 25, percent: 80, band: 'Proficient', finishedAt: '2026-09-15T08:00:00.000Z' },
     { name: 'Bogus Mode', mode: 'expert', score: 1, total: 25, percent: 4, band: 'x', finishedAt: '2026-09-30T09:00:00.000Z' },
     'not a row',
@@ -1090,7 +1090,7 @@ await test('Class history renders remote rows as text, newest first, marks the c
   byId(app, 'history-filter-medium').click();
   await settle(app);
   assert.equal(mode, 'medium', 'the filter is sent to the sheet');
-  assert.equal(fetch.calls.at(-1).url, `${TEST_ENDPOINT}?mode=medium&limit=100`);
+  assert.equal(fetch.calls.at(-1).url, `${TEST_ENDPOINT}?lesson=isr&mode=medium&limit=100`);
   assert.deepEqual(rendered().map(cells => cells[1]), ['Medium', 'Medium'], 'only Medium rows are shown');
   assert.equal(byId(app, 'history-filter-medium').getAttribute('aria-pressed'), 'true');
   assert.equal(byId(app, 'history-filter-all').getAttribute('aria-pressed'), 'false');

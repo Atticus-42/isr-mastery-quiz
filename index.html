@@ -866,6 +866,8 @@
     var HISTORY_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwTNNYOiebIGo46PzM3fUA9VT6XnS740D72prOPg-0OJ5Kvg4W8LVl-xJEo_gxImxqnmg/exec';
     // Most recent attempts requested for the score history table (the sheet caps this at 200).
     var HISTORY_LIMIT = 100;
+    // Names the score-history tab for this lesson in the shared Google Sheet (see apps-script/Code.gs LESSONS).
+    var HISTORY_LESSON = 'isr';
 
     var MODES = ['easy', 'medium', 'hard'];
     var MODE_LABELS = { easy: 'Easy', medium: 'Medium', hard: 'Hard' };
@@ -1672,6 +1674,7 @@
     function buildSubmission(results) {
       return {
         name: results.studentName,
+        lesson: HISTORY_LESSON,
         mode: results.mode,
         score: results.score,
         total: results.total,
@@ -1727,7 +1730,7 @@
     }
 
     function historyUrl(filter) {
-      return ENDPOINT + (ENDPOINT.indexOf('?') === -1 ? '?' : '&') + 'mode=' + encodeURIComponent(filter) + '&limit=' + HISTORY_LIMIT;
+      return ENDPOINT + (ENDPOINT.indexOf('?') === -1 ? '?' : '&') + 'lesson=' + encodeURIComponent(HISTORY_LESSON) + '&mode=' + encodeURIComponent(filter) + '&limit=' + HISTORY_LIMIT;
     }
 
     function toInteger(value) {
