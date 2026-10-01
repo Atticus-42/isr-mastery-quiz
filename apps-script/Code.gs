@@ -1,8 +1,14 @@
-// Class score history for the quiz site. Deploy as a Web app (Execute as: Me, Who has access: Anyone).
-// POST (Content-Type text/plain) body: {"name","mode","score","total","percent","band","finishedAt"}
-// GET  ?mode=all|easy|medium|hard&limit=100  ->  {"ok":true,"rows":[...newest first]}
+// Class score history for the quiz sites. Deploy as a Web app (Execute as: Me, Who has access: Anyone).
+// One spreadsheet serves every lesson quiz: each lesson has its own tab (see LESSONS).
+// POST (Content-Type text/plain) body: {"lesson","name","mode","score","total","percent","band","finishedAt"}
+// GET  ?lesson=isr|armor&mode=all|easy|medium|hard&limit=100  ->  {"ok":true,"rows":[...newest first]}
+// A request without "lesson" is treated as the first lesson ('isr'), so older quiz pages keep working.
 
-var SHEET_NAME = 'History';
+var LESSONS = {
+  isr: 'History',        // first quiz: ISR Operations (original tab name kept)
+  armor: 'Armor History' // Armor Operations quiz; add more lines here for future lessons
+};
+var DEFAULT_LESSON = 'isr';
 var HEADERS = ['Received', 'Name', 'Mode', 'Score', 'Total', 'Percent', 'Band', 'Finished'];
 var MODES = ['easy', 'medium', 'hard'];
 var BANDS = ['Mastery', 'Proficient', 'Developing', 'Needs review'];
@@ -12,6 +18,8 @@ var MAX_LIMIT = 200;
 function doPost(e) {
   try {
     var data = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    var tab = tabFor(data.lesson);
+    if (!tab) return reply({ ok: false, error: 'unknown lesson' });
     var name = cleanName(data.name);
     var mode = String(data.mode || '').toLowerCase();
     var score = Number(data.score);
@@ -26,7 +34,7 @@ function doPost(e) {
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
     try {
-      sheet().appendRow([new Date(), name, mode, score, TOTAL, percent, band, finished]);
+      sheet(tab).appendRow([new Date(), name, mode, score, TOTAL, percent, band, finished]);
     } finally {
       lock.releaseLock();
     }
@@ -38,9 +46,11 @@ function doPost(e) {
 
 function doGet(e) {
   var params = (e && e.parameter) || {};
+  var tab = tabFor(params.lesson);
+  if (!tab) return reply({ ok: false, error: 'unknown lesson' });
   var mode = String(params.mode || 'all').toLowerCase();
   var limit = Math.min(Math.max(parseInt(params.limit, 10) || 100, 1), MAX_LIMIT);
-  var values = sheet().getDataRange().getValues().slice(1);
+  var values = sheet(tab).getDataRange().getValues().slice(1);
   var rows = [];
   for (var i = values.length - 1; i >= 0 && rows.length < limit; i--) {
     var v = values[i];
@@ -58,9 +68,15 @@ function doGet(e) {
   return reply({ ok: true, rows: rows });
 }
 
-function sheet() {
+// Only lessons listed in LESSONS are accepted, so callers cannot create arbitrary tabs.
+function tabFor(lesson) {
+  var key = String(lesson || DEFAULT_LESSON).toLowerCase();
+  return Object.prototype.hasOwnProperty.call(LESSONS, key) ? LESSONS[key] : null;
+}
+
+function sheet(name) {
   var book = SpreadsheetApp.getActiveSpreadsheet();
-  var target = book.getSheetByName(SHEET_NAME) || book.insertSheet(SHEET_NAME);
+  var target = book.getSheetByName(name) || book.insertSheet(name);
   if (target.getLastRow() === 0) {
     target.appendRow(HEADERS);
     target.setFrozenRows(1);
